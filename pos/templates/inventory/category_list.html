@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ipo-Ipo POS — Categories</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #1e293b;
+            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
+            --primary: #4f46e5; --primary-dark: #4338ca; --primary-light: #818cf8;
+            --success: #22c55e; --danger: #ef4444;
+            --radius: 12px; --radius-sm: 8px;
+        }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+        .sidebar {
+            width: 240px; background: var(--bg-card); border-right: 1px solid var(--border);
+            padding: 1.25rem; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
+        }
+        .sidebar-brand { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; font-size: 0.85rem; transition: 0.15s; }
+        .nav-item:hover { background: var(--bg-input); color: var(--text); }
+        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
+        .main { flex: 1; padding: 1.5rem 2rem; max-width: 1100px; }
+        h1 { font-size: 1.3rem; margin-bottom: 1.25rem; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border: none; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; text-decoration: none; font-weight: 500; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        th { color: var(--text-muted); font-weight: 600; }
+        .actions { display: flex; gap: 0.4rem; }
+        a { color: var(--primary-light); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .empty { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-brand">🏪 Ipo-Ipo <small>Point of Sale</small></div>
+        <div class="nav-section">Menu</div>
+        <a class="nav-item{% if nav_active == 'dashboard' %} active{% endif %}" href="{% url 'home' %}">📊 Dashboard</a>
+        <a class="nav-item{% if nav_active == 'sales' %} active{% endif %}" href="{% url 'sales_history' %}">📋 Sales</a>
+        <a class="nav-item{% if nav_active == 'products' %} active{% endif %}" href="{% url 'product_catalog' %}">📦 Products</a>
+        <a class="nav-item{% if nav_active == 'categories' %} active{% endif %}" href="{% url 'category_list' %}">🏷️ Categories</a>
+        <a class="nav-item{% if nav_active == 'customers' %} active{% endif %}" href="{% url 'customers' %}">👥 Customers</a>
+        <a class="nav-item{% if nav_active == 'reports' %} active{% endif %}" href="{% url 'reports' %}">📈 Reports</a>
+        <div class="nav-section">Management</div>
+        <a class="nav-item{% if nav_active == 'inventory' %} active{% endif %}" href="{% url 'inventory_dashboard' %}">🏷️ Inventory</a>
+        <a class="nav-item{% if nav_active == 'discounts' %} active{% endif %}" href="{% url 'discount_list' %}">🏷️ Discount Types</a>
+    </div>
+    <div class="main">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+            <h1>🏷️ Categories</h1>
+            <a href="{% url 'category_add' %}" class="btn btn-primary">➕ Add Category</a>
+        </div>
+        <div class="card">
+            {% if categories %}
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Description</th><th>Items</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for cat in categories %}
+                    <tr>
+                        <td><strong>{{ cat.name }}</strong></td>
+                        <td>{{ cat.description|default:"—" }}</td>
+                        <td>{{ cat.items.count }}</td>
+                        <td class="actions">
+                            <a href="{% url 'category_edit' cat.pk %}" class="btn btn-sm" style="background:var(--primary);color:#fff">✏️ Edit</a>
+                            <a href="{% url 'category_delete' cat.pk %}" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">
+                <p>No categories yet.</p>
+                <p style="margin-top:0.5rem"><a href="{% url 'category_add' %}">Add your first category →</a></p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

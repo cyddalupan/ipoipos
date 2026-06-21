@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ipo-Ipo POS — Products</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4f46e5; --primary-light: #818cf8;
+            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
+            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
+            --radius: 12px; --radius-sm: 8px;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex;
+        }
+        .sidebar {
+            width: 240px; background: #111827;
+            border-right: 1px solid var(--border);
+            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+        .sidebar-brand .icon { font-size: 1.75rem; width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; }
+        .nav-item:hover { background: var(--bg-input); color: var(--text); }
+        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .sidebar-footer .info { font-size: 0.8rem; }
+        .sidebar-footer .info .name { font-weight: 600; }
+        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .topbar-left { display: flex; align-items: center; gap: 1rem; }
+        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
+        .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .card-header h3 { font-size: 0.95rem; font-weight: 600; }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+        .product-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; text-align: center; transition: border-color 0.15s; }
+        .product-card:hover { border-color: var(--primary-light); }
+        .product-card .emoji { font-size: 2.5rem; display: block; margin-bottom: 0.5rem; }
+        .product-card .name { font-size: 0.9rem; font-weight: 600; }
+        .product-card .category { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .product-card .price { font-size: 1.1rem; font-weight: 700; color: var(--success); margin-top: 0.4rem; }
+        .product-card .stock { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .empty { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="icon">🏪</div>
+            <h1>Ipo-Ipo<small>Products</small></h1>
+        </div>
+        {% url 'home' as home_url %}
+        {% url 'sales_history' as sales_url %}
+        {% url 'customers' as customers_url %}
+        {% url 'reports' as reports_url %}
+        {% url 'inventory_dashboard' as inventory_url %}
+        <div class="nav-section">Menu</div>
+        <a class="nav-item" href="{{ home_url }}">📊 Dashboard</a>
+        <a class="nav-item" href="{{ sales_url }}">📋 Sales</a>
+        <a class="nav-item active" href="#">📦 Products</a>
+        <a class="nav-item" href="{{ customers_url }}">👥 Customers</a>
+        <a class="nav-item" href="{{ reports_url }}">📈 Reports</a>
+        <div class="nav-section" style="margin-top:1.5rem">Management</div>
+        <a class="nav-item" href="{{ inventory_url }}">🏷️ Inventory</a>
+        <div class="sidebar-footer">
+            <div class="avatar">I</div>
+            <div class="info"><div class="name">Ipo-Ipo POS</div><div class="role">Offline App</div></div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-left">
+                <h2>📦 Product Catalog</h2>
+            </div>
+        </div>
+        <div class="content">
+            {% if items %}
+                {% regroup items by category as category_list %}
+                {% for cat_group in category_list %}
+                <div class="card">
+                    <div class="card-header">
+                        <h3>{{ cat_group.grouper.name }}</h3>
+                        <span style="font-size:0.8rem;color:var(--text-muted)">{{ cat_group.list|length }} items</span>
+                    </div>
+                    <div class="product-grid">
+                        {% for item in cat_group.list %}
+                        <div class="product-card">
+                            <span class="emoji">{{ item.display_icon }}</span>
+                            <div class="name">{{ item.name }}</div>
+                            <div class="category">{{ item.sku }}</div>
+                            <div class="price">₱{{ item.selling_price|floatformat:2 }}</div>
+                            <div class="stock">
+                                {% if item.stock_qty <= item.low_stock_threshold and item.stock_qty > 0 %}
+                                    ⚠️ Low stock: {{ item.stock_qty }}
+                                {% elif item.stock_qty == 0 %}
+                                    ❌ Out of stock
+                                {% else %}
+                                    📦 Stock: {{ item.stock_qty }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="card">
+                <div class="empty">
+                    <p style="font-size:2rem;margin-bottom:0.5rem">📦</p>
+                    <p>No products yet.</p>
+                    <p style="font-size:0.85rem;margin-top:0.5rem"><a href="{% url 'item_add' %}" style="color:var(--primary-light)">Add products in Inventory →</a></p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

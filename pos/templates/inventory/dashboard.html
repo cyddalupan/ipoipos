@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ipo-Ipo POS — Inventory</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #4f46e5; --primary-light: #818cf8;
+            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
+            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
+            --radius: 12px; --radius-sm: 8px;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; display: flex;
+        }
+        .sidebar {
+            width: 240px; background: #111827;
+            border-right: 1px solid var(--border);
+            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
+        }
+        .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
+        .sidebar-brand .icon { font-size: 1.75rem; width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
+        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
+        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; }
+        .nav-item:hover { background: var(--bg-input); color: var(--text); }
+        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
+        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+        .sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
+        .sidebar-footer .info { font-size: 0.8rem; }
+        .sidebar-footer .info .name { font-weight: 600; }
+        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .topbar-left { display: flex; align-items: center; gap: 1rem; }
+        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
+        .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .card-header h3 { font-size: 0.95rem; font-weight: 600; }
+        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: none; font-size: 0.85rem; font-weight: 500; cursor: default; text-decoration: none; transition: all 0.15s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #4338ca; }
+        .btn-success { background: var(--success); color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 0.7rem 0.75rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
+        td { padding: 0.7rem 0.75rem; font-size: 0.85rem; border-bottom: 1px solid rgba(51,65,85,0.3); }
+        tr:hover td { background: rgba(51,65,85,0.2); }
+        .item-icon { font-size: 1.5rem; }
+        .badge { display: inline-flex; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+        .badge-success { background: rgba(34,197,94,0.15); color: var(--success); }
+        .badge-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .badge-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .empty { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .action-link { color: var(--primary-light); text-decoration: none; font-size: 0.8rem; }
+        .action-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <div class="icon">🏪</div>
+            <h1>Ipo-Ipo<small>Inventory</small></h1>
+        </div>
+        {% url 'home' as home_url %}
+        {% url 'product_catalog' as products_url %}
+        {% url 'customers' as customers_url %}
+        {% url 'sales_history' as sales_url %}
+        {% url 'reports' as reports_url %}
+        {% url 'inventory_dashboard' as inventory_url %}
+        {% url 'category_list' as categories_url %}
+        {% url 'discount_list' as discounts_url %}
+        <div class="nav-section">Menu</div>
+        <a class="nav-item" href="{{ home_url }}">📊 Dashboard</a>
+        <a class="nav-item" href="{{ sales_url }}">📋 Sales</a>
+        <a class="nav-item" href="{{ products_url }}">📦 Products</a>
+        <a class="nav-item" href="{{ categories_url }}">🏷️ Categories</a>
+        <a class="nav-item" href="{{ customers_url }}">👥 Customers</a>
+        <a class="nav-item" href="{{ reports_url }}">📈 Reports</a>
+        <div class="nav-section" style="margin-top:1.5rem">Management</div>
+        <a class="nav-item active" href="{{ inventory_url }}">🏷️ Inventory</a>
+        <a class="nav-item" href="{{ discounts_url }}">🏷️ Discount Types</a>
+        <div class="sidebar-footer">
+            <div class="avatar">I</div>
+            <div class="info"><div class="name">Ipo-Ipo POS</div><div class="role">Offline App</div></div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="topbar">
+            <div class="topbar-left">
+                <h2>🏷️ Inventory</h2>
+            </div>
+            <a href="{% url 'item_add' %}" class="btn btn-primary">➕ Add Item</a>
+        </div>
+        <div class="content">
+            <div class="card">
+                <div class="card-header">
+                    <h3>All Items</h3>
+                    <span style="font-size:0.8rem;color:var(--text-muted)">{{ inventory_items|length }} items</span>
+                </div>
+                {% if inventory_items %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Cost</th>
+                            <th>Selling</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in inventory_items %}
+                        <tr>
+                            <td class="item-icon">{{ item.display_icon }}</td>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td style="color:var(--text-muted)">{{ item.sku }}</td>
+                            <td>{{ item.category.name }}</td>
+                            <td>₱{{ item.cost_price|floatformat:2 }}</td>
+                            <td>₱{{ item.selling_price|floatformat:2 }}</td>
+                            <td>
+                                {% if item.stock_qty <= item.low_stock_threshold and item.stock_qty > 0 %}
+                                    <span class="badge badge-warning">{{ item.stock_qty }}</span>
+                                {% elif item.stock_qty == 0 %}
+                                    <span class="badge badge-danger">0</span>
+                                {% else %}
+                                    {{ item.stock_qty }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td style="display:flex;gap:0.3rem">
+                                <a href="{% url 'item_edit' item.id %}" class="action-link">✏️</a>
+                                <a href="{% url 'item_delete' item.id %}" class="action-link" style="color:var(--danger)">🗑️</a>
+                                <span class="action-link" style="color:var(--warning);cursor:pointer" onclick="document.getElementById('stock-form-{{ item.id }}').style.display='block'" title="Adjust Stock">📦</span>
+                                <form method="post" action="{% url 'stock_adjust' item.id %}" id="stock-form-{{ item.id }}" style="display:none;">
+                                    {% csrf_token %}
+                                    <input type="number" name="stock_qty" value="{{ item.stock_qty }}" min="0" style="width:60px;padding:2px 4px;font-size:0.75rem">
+                                    <button type="submit" style="padding:2px 6px;font-size:0.7rem">OK</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty">
+                    <p style="font-size:2rem;margin-bottom:0.5rem">📦</p>
+                    <p>No inventory items yet.</p>
+                    <p style="font-size:0.85rem;margin-top:0.5rem"><a href="{% url 'item_add' %}" style="color:var(--primary-light)">Add your first item →</a></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
