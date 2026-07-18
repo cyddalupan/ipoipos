@@ -1,91 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — Customers</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4f46e5; --primary-light: #818cf8;
-            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
-            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
-            --radius: 12px; --radius-sm: 8px;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text);
-            min-height: 100vh; display: flex;
-        }
-        .sidebar {
-            width: 240px; background: #111827;
-            border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
-        .sidebar-brand .icon { font-size: 1.75rem; width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
-        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
-        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; }
-        .nav-item:hover { background: var(--bg-input); color: var(--text); }
-        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
-        .sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
-        .sidebar-footer .info { font-size: 0.8rem; }
-        .sidebar-footer .info .name { font-weight: 600; }
-        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .topbar-left { display: flex; align-items: center; gap: 1rem; }
-        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
-        .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 3rem; text-align: center; }
-        .placeholder-icon { font-size: 3rem; margin-bottom: 1rem; }
-        .placeholder-text { color: var(--text-muted); font-size: 1rem; line-height: 1.6; }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <div class="icon">🏪</div>
-            <h1>Ipo-Ipo<small>Customers</small></h1>
-        </div>
-        {% url 'home' as home_url %}
-        {% url 'product_catalog' as products_url %}
-        {% url 'reports' as reports_url %}
-        {% url 'sales_history' as sales_url %}
-        {% url 'inventory_dashboard' as inventory_url %}
-        <div class="nav-section">Menu</div>
-        <a class="nav-item" href="{{ home_url }}">📊 Dashboard</a>
-        <a class="nav-item" href="{{ sales_url }}">📋 Sales</a>
-        <a class="nav-item" href="{{ products_url }}">📦 Products</a>
-        <a class="nav-item active" href="#">👥 Customers</a>
-        <a class="nav-item" href="{{ reports_url }}">📈 Reports</a>
-        <div class="nav-section" style="margin-top:1.5rem">Management</div>
-        <a class="nav-item" href="{{ inventory_url }}">🏷️ Inventory</a>
-        <div class="sidebar-footer">
-            <div class="avatar">I</div>
-            <div class="info"><div class="name">Ipo-Ipo POS</div><div class="role">Offline App</div></div>
-        </div>
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — Customers{% endblock %}
+
+{% block breadcrumb %}
+<h2>Customers</h2>
+{% url 'home' as crumb_home_url %}<div class="breadcrumb"><a href="{{ crumb_home_url }}">Dashboard</a><span class="sep">/</span><span>Customers</span></div>
+{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="card"><div class="stat-label">Total Customers</div><div class="stat-value">{{ customers|length }}</div></div>
+    <div class="card"><div class="stat-label">With Outstanding Balances</div><div class="stat-value">{{ with_balance|default:"0" }}</div></div>
+    <div class="card"><div class="stat-label">Total Outstanding</div><div class="stat-value" style="color:var(--danger);">₱{{ total_outstanding|floatformat:2|default:"0.00" }}</div></div>
+    <div class="card"><div class="stat-label">Credit Limit Avg</div><div class="stat-value" style="color:var(--info);">₱{{ avg_credit_limit|floatformat:2|default:"0.00" }}</div></div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3><svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:0.3rem;stroke:var(--primary);stroke-width:1.5;fill:none;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> All Customers</h3>
+        <a href="{{ customer_form_url }}" class="btn btn-sm btn-primary">+ New Customer</a>
     </div>
-    <div class="main">
-        <div class="topbar">
-            <div class="topbar-left">
-                <h2>👥 Customers</h2>
-            </div>
-        </div>
-        <div class="content">
-            <div class="card">
-                <div class="placeholder-icon">🛠️</div>
-                <div class="placeholder-text">
-                    <p><strong>Customer Management</strong></p>
-                    <p style="margin-top:0.5rem">This module is under development.</p>
-                    <p style="margin-top:0.25rem;font-size:0.85rem">No login required — customers can be tracked by name or contact number.</p>
-                    <p style="margin-top:0.5rem;font-size:0.85rem;color:var(--primary-light)">Coming soon: walk-in tracking, purchase history, loyalty points.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th class="text-right">Credit Limit</th>
+                <th class="text-right">Outstanding</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in customers %}
+            <tr>
+                <td class="fw-bold">{{ c.name }}</td>
+                <td>{{ c.phone|default:"—" }}</td>
+                <td class="text-right">₱{{ c.credit_limit|floatformat:2 }}</td>
+                <td class="text-right">{% if c.outstanding_balance > 0 %}<span class="text-danger">₱{{ c.outstanding_balance|floatformat:2 }}</span>{% else %}₱0.00{% endif %}</td>
+                <td>{% if c.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-neutral">Inactive</span>{% endif %}</td>
+                <td><a href="/customers/{{ c.id }}/edit/" class="btn-action btn-action-edit">Edit</a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted" style="padding:2rem;">No customers yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

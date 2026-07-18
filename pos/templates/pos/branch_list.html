@@ -1,0 +1,73 @@
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — Branches{% endblock %}
+
+{% block extra_head %}
+<style>
+.type-badge { display: inline-flex; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+.type-lpg { background: rgba(234,179,8,0.15); color: #a16207; }
+.type-agri { background: rgba(34,197,94,0.15); color: #16a34a; }
+.type-gas { background: rgba(59,130,246,0.15); color: #2563eb; }
+.badge { display: inline-flex; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+.badge-active { background: rgba(34,197,94,0.15); color: var(--success); }
+.badge-inactive { background: rgba(239,68,68,0.15); color: var(--danger); }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}<h2>🌿 Branches</h2>{% endblock %}
+
+{% block topbar_right %}
+<div class="topbar-right">
+    {% if current_branch %}
+    <span style="font-size:0.75rem;color:var(--text-muted-content);margin-right:0.5rem;display:inline-flex;align-items:center;gap:0.3rem;">
+        <span>{% if current_branch.type == "LPG" %}🔥{% elif current_branch.type == "AGRI" %}🌾{% elif current_branch.type == "GAS" %}⛽{% elif current_branch.type == "RETAIL" %}🛒{% elif current_branch.type == "WHOLESALE" %}📦{% elif current_branch.type == "SERVICE" %}🔧{% elif current_branch.type == "MANUFACTURING" %}🏭{% elif current_branch.type == "FOOD" %}🍽️{% elif current_branch.type == "HEALTH" %}💊{% elif current_branch.type == "EDUCATION" %}📚{% elif current_branch.type == "TRANSPORT" %}🚚{% elif current_branch.type == "CONSTRUCTION" %}🏗️{% elif current_branch.type == "TECH" %}💻{% else %}🏪{% endif %}</span>
+        {{ current_branch.name }}
+    </span>
+    <a href="{% url 'branch_select' %}" style="font-size:0.75rem;color:var(--primary);text-decoration:none;margin-right:0.75rem;">🔄 Change</a>
+    {% endif %}
+    <a href="{% url 'branch_add' %}" class="btn btn-primary btn-sm">➕ Add Branch</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    {% if branches %}
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Tax Rate</th>
+                <th>Currency</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in branches %}
+            <tr>
+                <td><strong>{{ b.code }}</strong></td>
+                <td>{{ b.name }}</td>
+                <td><span class="type-badge type-{{ b.type|lower }}">{{ b.get_type_display }}</span></td>
+                <td>{{ b.tax_rate }}%</td>
+                <td>{{ b.currency }}</td>
+                <td><span class="badge {% if b.is_active %}badge-active{% else %}badge-inactive{% endif %}">{{ b.is_active|yesno:"Active,Inactive" }}</span></td>
+                <td>
+                    <a href="{% url 'branch_edit' b.pk %}" class="btn-action btn-action-edit">✏️ Edit</a>
+                    <a href="{% url 'branch_delete' b.pk %}" class="btn-action btn-action-delete">🗑️</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🏪</div>
+        <p>No branches yet.</p>
+        <a href="{% url 'branch_add' %}" class="btn btn-primary">Create your first branch</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

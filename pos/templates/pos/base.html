@@ -1,0 +1,202 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CASSEY{% endblock %}</title>
+    <link rel="icon" type="image/png" href="{% static 'pos/favicon.svg' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'pos/css/ipoipo.css' %}">
+    <style>
+        .sidebar-branch {
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .branch-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 0;
+        }
+        .branch-icon-sm {
+            font-size: 1.1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .branch-info-sm .name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            line-height: 1.2;
+        }
+        .branch-info-sm .code {
+            font-size: 0.65rem;
+            color: #64748b;
+        }
+        .switch-link {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 0.25rem;
+            flex-shrink: 0;
+        }
+        .switch-link:hover { color: #0d9488; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="page-{{ nav_active|default:'dashboard' }}">
+    {% block sidebar %}
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4C14 4 10 7 10 12s4 8 11 8"/><path d="M3 4c7 0 11 3 11 8s-4 8-11 8"/><path d="M12 12h10"/><path d="M2 12h8"/></svg></div>
+            <div>
+                <h1>CASSEY</h1>
+                <small>POS System</small>
+            </div>
+        </div>
+
+        <div class="nav-section">Main Menu</div>
+        {% url 'home' as nav_home_url %}
+        {% url 'inventory_dashboard' as nav_inventory_url %}
+        {% url 'category_list' as nav_category_url %}
+        {% url 'discount_list' as nav_discount_url %}
+        {% url 'sales_history' as nav_sales_url %}
+        {% url 'reports' as nav_reports_url %}
+        {% url 'product_catalog' as nav_products_url %}
+        {% url 'customers' as nav_customers_url %}
+{% url 'branch_list' as nav_branch_url %}
+
+        <a class="nav-item{% if nav_active == 'dashboard' %} active{% endif %}" href="{{ nav_home_url }}">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Dashboard
+        </a>
+        <a class="nav-item{% if nav_active == 'inventory' %} active{% endif %}" href="{{ nav_inventory_url }}">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            Inventory
+        </a>
+        <a class="nav-item{% if nav_active == 'categories' %} active{% endif %}" href="{{ nav_category_url }}">
+            <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+            Categories
+        </a>
+        <a class="nav-item{% if nav_active == 'discounts' %} active{% endif %}" href="{{ nav_discount_url }}">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Discounts
+        </a>
+        <div class="nav-section">Reports</div>
+        <a class="nav-item{% if nav_active == 'sales' %} active{% endif %}" href="{{ nav_sales_url }}">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Sales History
+        </a>
+        <a class="nav-item{% if nav_active == 'reports' %} active{% endif %}" href="{{ nav_reports_url }}">
+            <svg viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 118 2.83M22 12A10 10 0 0112 22 10 10 0 0112 2v10z"/></svg>
+            Reports
+        </a>
+        <div class="nav-section">Management</div>
+        <a class="nav-item{% if nav_active == 'products' %} active{% endif %}" href="{{ nav_products_url }}">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            Products
+        </a>
+        <a class="nav-item{% if nav_active == 'customers' %} active{% endif %}" href="{{ nav_customers_url }}">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            Customers
+        </a>
+        <a class="nav-item{% if nav_active == 'branches' %} active{% endif %}" href="{{ nav_branch_url }}">
+            <svg viewBox="0 0 24 24"><path d="M6 3v12"/><path d="M18 9a3 3 0 100-6 3 3 0 000 6z"/><path d="M6 21a3 3 0 100-6 3 3 0 000 6z"/><path d="M18 9a9 9 0 01-9 9"/></svg>
+            Branches
+        </a>
+        {% block nav_extra %}{% endblock %}
+
+        {% block upgrade_cta %}{% endblock %}
+
+        {% if current_branch %}
+        <div class="sidebar-branch">
+            <div class="branch-indicator">
+                <span class="branch-icon-sm">{% if current_branch.type == "LPG" %}🔥{% elif current_branch.type == "AGRI" %}🌾{% elif current_branch.type == "GAS" %}⛽{% elif current_branch.type == "RETAIL" %}🛒{% elif current_branch.type == "WHOLESALE" %}📦{% elif current_branch.type == "SERVICE" %}🔧{% elif current_branch.type == "MANUFACTURING" %}🏭{% elif current_branch.type == "FOOD" %}🍽️{% elif current_branch.type == "HEALTH" %}💊{% elif current_branch.type == "EDUCATION" %}📚{% elif current_branch.type == "TRANSPORT" %}🚚{% elif current_branch.type == "CONSTRUCTION" %}🏗️{% elif current_branch.type == "TECH" %}💻{% else %}🏪{% endif %}</span>
+                <div class="branch-info-sm">
+                    <div class="name">{{ current_branch.name }}</div>
+                    <div class="code">{{ current_branch.code }}</div>
+                </div>
+            </div>
+            <a href="{% url 'branch_select' %}" class="switch-link" title="Switch Branch">🔄</a>
+        </div>
+        {% endif %}
+        {% block sidebar_footer %}
+        <div class="sidebar-footer">
+            {% if request.user.is_authenticated %}
+            <div class="avatar">{{ request.user.username|first|upper }}</div>
+            <div class="info">
+                <div class="name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                <div class="role">Cashier</div>
+            </div>
+            {% else %}
+            <div class="avatar">C</div>
+            <div class="info">
+                <div class="name">Cashier</div>
+                <div class="role">Offline Mode</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endblock %}
+    </nav>
+    {% endblock %}
+
+    {% block sidebar_overlay %}
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+    {% endblock %}
+
+    <div class="main">
+        {% block topbar %}
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                {% block breadcrumb %}
+                <h2>{{ page_title|default:"Dashboard" }}</h2>
+                {% endblock %}
+            </div>
+            {% block topbar_right %}
+            <div class="topbar-right">
+            {% if current_branch %}
+                <span style="font-size:0.75rem;color:var(--text-muted-content);margin-right:0.5rem;display:inline-flex;align-items:center;gap:0.3rem;">
+                    <span>{% if current_branch.type == "LPG" %}🔥{% elif current_branch.type == "AGRI" %}🌾{% elif current_branch.type == "GAS" %}⛽{% elif current_branch.type == "RETAIL" %}🛒{% elif current_branch.type == "WHOLESALE" %}📦{% elif current_branch.type == "SERVICE" %}🔧{% elif current_branch.type == "MANUFACTURING" %}🏭{% elif current_branch.type == "FOOD" %}🍽️{% elif current_branch.type == "HEALTH" %}💊{% elif current_branch.type == "EDUCATION" %}📚{% elif current_branch.type == "TRANSPORT" %}🚚{% elif current_branch.type == "CONSTRUCTION" %}🏗️{% elif current_branch.type == "TECH" %}💻{% else %}🏪{% endif %}</span>
+                    {{ current_branch.name }}
+                </span>
+                <a href="{% url 'branch_select' %}" style="font-size:0.75rem;color:var(--primary);text-decoration:none;margin-right:0.75rem;">🔄 Change</a>
+            {% endif %}
+            </div>
+            {% endblock %}
+        </header>
+        {% endblock %}
+
+        <main class="content">
+            {% if messages %}
+            {% for msg in messages %}
+            <div class="message-card" style="border-left:4px solid {% if msg.tags == 'success' %}var(--success){% elif msg.tags == 'error' %}var(--danger){% elif msg.tags == 'warning' %}var(--warning){% else %}var(--primary){% endif %};">
+                <span class="{% if msg.tags == 'error' %}text-danger{% elif msg.tags == 'success' %}text-success{% elif msg.tags == 'warning' %}text-warning{% else %}text-primary{% endif %} fw-bold">{{ msg }}</span>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebar-overlay').classList.toggle('show');
+    }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

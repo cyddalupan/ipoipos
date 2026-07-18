@@ -1,163 +1,163 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — {% if object %}Edit{% else %}Add{% endif %} Item</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4f46e5; --primary-light: #818cf8;
-            --success: #22c55e; --danger: #ef4444;
-            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
-            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
-            --radius: 12px; --radius-sm: 8px;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text);
-            min-height: 100vh; display: flex;
-        }
-        .sidebar {
-            width: 240px; background: #111827;
-            border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
-        .sidebar-brand .icon { font-size: 1.75rem; width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
-        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
-        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; }
-        .nav-item:hover { background: var(--bg-input); color: var(--text); }
-        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
-        .sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
-        .sidebar-footer .info { font-size: 0.8rem; }
-        .sidebar-footer .info .name { font-weight: 600; }
-        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .topbar-left { display: flex; align-items: center; gap: 1rem; }
-        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
-        .content { flex: 1; padding: 1.5rem; overflow-y: auto; max-width: 720px; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 0.55rem 0.75rem;
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); color: var(--text); font-size: 0.9rem;
-            outline: none; font-family: inherit;
-        }
-        .form-group input:focus, .form-group select:focus { border-color: var(--primary-light); }
-        .form-group .help { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.55rem 1.25rem; border-radius: var(--radius-sm); border: none; font-size: 0.85rem; font-weight: 500; cursor: default; text-decoration: none; transition: all 0.15s; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #4338ca; }
-        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
-        .btn-outline:hover { background: var(--bg-input); color: var(--text); }
-        .actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
-        .errorlist { color: var(--danger); font-size: 0.8rem; list-style: none; margin-top: 0.2rem; }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <div class="icon">🏪</div>
-            <h1>Ipo-Ipo<small>Inventory</small></h1>
-        </div>
-        {% url 'home' as home_url %}
-        {% url 'inventory_dashboard' as inventory_url %}
-        <div class="nav-section">Menu</div>
-        <a class="nav-item" href="{{ home_url }}">📊 Dashboard</a>
-        <a class="nav-item" href="{{ inventory_url }}">🏷️ Inventory</a>
-        <div class="sidebar-footer">
-            <div class="avatar">I</div>
-            <div class="info"><div class="name">Ipo-Ipo POS</div><div class="role">Offline App</div></div>
-        </div>
-    </div>
-    <div class="main">
-        <div class="topbar">
-            <div class="topbar-left">
-                <h2>{% if object %}✏️ Edit Item{% else %}➕ Add Item{% endif %}</h2>
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — {% if object %}Edit{% else %}Add{% endif %} Item{% endblock %}
+
+{% block extra_head %}
+<style>
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.55rem 0.75rem;
+    background: var(--bg-input); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 0.9rem;
+    outline: none; font-family: inherit;
+}
+.form-group input:focus, .form-group select:focus { border-color: var(--primary-light); }
+.form-group .help { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem; }
+.actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.errorlist { color: var(--danger); font-size: 0.8rem; list-style: none; margin-top: 0.2rem; padding: 0; }
+.size-rows { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-top: 0.5rem; }
+.size-row { display: grid; grid-template-columns: 1fr 1fr 1fr 30px; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+.size-row input { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+.remove-size { background: none; border: 1px solid var(--danger); color: var(--danger); border-radius: 4px; cursor: pointer; font-size: 1rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+.remove-size:hover { background: var(--danger); color: #fff; }
+.add-size { background: none; border: 1px dashed var(--primary); color: var(--primary); border-radius: 4px; cursor: pointer; padding: 0.3rem 0.6rem; font-size: 0.8rem; margin-top: 0.5rem; }
+.add-size:hover { background: var(--primary); color: #fff; }
+</style>
+{% endblock %}
+
+{% block breadcrumb %}<h2>{% if object %}✏️ Edit Item{% else %}➕ Add Item{% endif %}</h2>{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:720px">
+    <form method="post" enctype="multipart/form-data" id="itemForm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        {% endif %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" name="name" maxlength="150" required id="id_name" value="{{ form.name.value|default:'' }}">
+                {% if form.name.errors %}<ul class="errorlist">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>SKU *</label>
+                <input type="text" name="sku" maxlength="50" required id="id_sku" value="{{ form.sku.value|default:'' }}">
+                {% if form.sku.errors %}<ul class="errorlist">{% for e in form.sku.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
             </div>
         </div>
-        <div class="content">
-            <div class="card">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Name *</label>
-                            {{ form.name }}
-                            {{ form.name.errors }}
-                        </div>
-                        <div class="form-group">
-                            <label>SKU *</label>
-                            {{ form.sku }}
-                            {{ form.sku.errors }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Category *</label>
-                            {{ form.category }}
-                            {{ form.category.errors }}
-                        </div>
-                        <div class="form-group">
-                            <label>Emoji</label>
-                            {{ form.emoji }}
-                            <div class="help">e.g., 🍗🍚🥤 — shown on POS screen</div>
-                            {{ form.emoji.errors }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Cost Price (₱) *</label>
-                            {{ form.cost_price }}
-                            {{ form.cost_price.errors }}
-                        </div>
-                        <div class="form-group">
-                            <label>Selling Price (₱) *</label>
-                            {{ form.selling_price }}
-                            {{ form.selling_price.errors }}
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Stock Qty</label>
-                            {{ form.stock_qty }}
-                            {{ form.stock_qty.errors }}
-                        </div>
-                        <div class="form-group">
-                            <label>Low Stock Alert</label>
-                            {{ form.low_stock_threshold }}
-                            <div class="help">Items below this qty will show warning</div>
-                            {{ form.low_stock_threshold.errors }}
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Product Image</label>
-                        {{ form.image }}
-                        <div class="help">Optional — emoji is used as fallback</div>
-                        {{ form.image.errors }}
-                    </div>
-                    {% if object %}
-                    <div class="form-group">
-                        <label>Active</label>
-                        {{ form.is_active }}
-                    </div>
-                    {% endif %}
-                    <div class="actions">
-                        <button type="submit" class="btn btn-primary">💾 Save</button>
-                        <a href="{% url 'inventory_dashboard' %}" class="btn btn-outline">Cancel</a>
-                    </div>
-                </form>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Category *</label>
+                <select name="category" required id="id_category">
+                    <option value="">Select a category</option>
+                    {% for c in categories %}
+                    <option value="{{ c.id }}" {% if form.category.value|stringformat:"i" == c.id|stringformat:"i" %}selected{% endif %}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.category.errors %}<ul class="errorlist">{% for e in form.category.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Emoji</label>
+                <input type="text" name="emoji" maxlength="10" id="id_emoji" value="{{ form.emoji.value|default:'' }}" placeholder="e.g. 🍔">
+                <div class="help">e.g., 🍗🍚🥤 — shown on POS screen</div>
+                {% if form.emoji.errors %}<ul class="errorlist">{% for e in form.emoji.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
             </div>
         </div>
-    </div>
-</body>
-</html>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Cost Price (₱) *</label>
+                <input type="number" name="cost_price" step="0.01" required id="id_cost_price" value="{{ form.cost_price.value|default:'' }}">
+                {% if form.cost_price.errors %}<ul class="errorlist">{% for e in form.cost_price.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Selling Price (₱) *</label>
+                <input type="number" name="selling_price" step="0.01" required id="id_selling_price" value="{{ form.selling_price.value|default:'' }}">
+                <div class="help">Default price if no sizes are used</div>
+                {% if form.selling_price.errors %}<ul class="errorlist">{% for e in form.selling_price.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Stock Qty</label>
+                <input type="number" name="stock_qty" id="id_stock_qty" value="{{ form.stock_qty.value|default:'0' }}">
+                {% if form.stock_qty.errors %}<ul class="errorlist">{% for e in form.stock_qty.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                <label>Low Stock Alert</label>
+                <input type="number" name="low_stock_threshold" id="id_low_stock_threshold" value="{{ form.low_stock_threshold.value|default:'10' }}">
+                <div class="help">Items below this qty will show warning</div>
+                {% if form.low_stock_threshold.errors %}<ul class="errorlist">{% for e in form.low_stock_threshold.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-group" style="grid-column:1/-1">
+            <label>Description</label>
+            <textarea name="description" id="id_description" rows="3" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;resize:vertical;">{{ form.description.value|default:'' }}</textarea>
+            <div class="help">Product description / details</div>
+            {% if form.description.errors %}<ul class="errorlist">{% for e in form.description.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Product Image</label>
+            <input type="file" name="image" accept="image/*" id="id_image">
+            <div class="help">Optional — emoji is used as fallback</div>
+            {% if form.image.errors %}<ul class="errorlist">{% for e in form.image.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+
+        {% if object %}
+        <div class="form-group">
+            <label class="checkbox-label" style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer;">
+                <input type="checkbox" name="is_active" id="id_is_active" {% if form.is_active.value %}checked{% endif %} style="width:auto;">
+                <span>Active</span>
+            </label>
+        </div>
+        {% endif %}
+
+        <!-- Sizes Section -->
+        <div class="form-group">
+            <label>Item Sizes & Pricing</label>
+            <div class="help" style="margin-bottom:0.5rem;">Add size variants (e.g., Small/Medium, 11kg/22kg, 1L/5L)</div>
+            <div class="size-rows" id="sizeContainer">
+                {% for size in sizes|default:"" %}
+                <div class="size-row">
+                    <input type="text" name="size_name[]" placeholder="Size name (e.g. 11kg)" value="{{ size.name }}">
+                    <input type="number" step="0.01" name="size_price[]" placeholder="Price" value="{{ size.price }}">
+                    <input type="number" step="0.01" name="size_retail_price[]" placeholder="Retail price" value="{% if size.retail_price %}{{ size.retail_price }}{% endif %}">
+                    <button type="button" class="remove-size" onclick="this.parentElement.remove()">×</button>
+                </div>
+                {% endfor %}
+                <button type="button" class="add-size" onclick="addSizeRow()">+ Add Size</button>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">💾 Save</button>
+            <a href="{% url 'inventory_dashboard' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+function addSizeRow() {
+    const container = document.getElementById('sizeContainer');
+    const addBtn = container.querySelector('.add-size');
+    const row = document.createElement('div');
+    row.className = 'size-row';
+    row.innerHTML = `
+        <input type="text" name="size_name[]" placeholder="Size name (e.g. 11kg)" value="">
+        <input type="number" step="0.01" name="size_price[]" placeholder="Price" value="">
+        <input type="number" step="0.01" name="size_retail_price[]" placeholder="Retail price" value="">
+        <button type="button" class="remove-size" onclick="this.parentElement.remove()">×</button>
+    `;
+    container.insertBefore(row, addBtn);
+}
+</script>
+{% endblock %}

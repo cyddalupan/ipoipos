@@ -1,80 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — {% if form.instance.pk %}Edit{% else %}Add{% endif %} Discount</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #1e293b;
-            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
-            --primary: #4f46e5; --primary-dark: #4338ca; --primary-light: #818cf8;
-            --radius: 12px; --radius-sm: 8px;
-        }
-        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
-        .sidebar {
-            width: 240px; background: var(--bg-card); border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh;
-        }
-        .sidebar-brand { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
-        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
-        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text); text-decoration: none; font-size: 0.85rem; transition: 0.15s; }
-        .nav-item:hover { background: var(--bg-input); color: var(--text); }
-        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
-        .main { flex: 1; padding: 1.5rem 2rem; max-width: 600px; }
-        h1 { font-size: 1.3rem; margin-bottom: 1.25rem; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; font-size: 0.85rem; margin-bottom: 0.3rem; color: var(--text-muted); }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%; padding: 0.6rem; background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); color: var(--text); font-size: 0.9rem;
-        }
-        .form-group select { cursor: pointer; }
-        .form-group input[type="checkbox"] { width: auto; margin-top: 0.3rem; }
-        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; border: none; border-radius: var(--radius-sm); font-size: 0.85rem; cursor: pointer; text-decoration: none; font-weight: 500; }
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-secondary { background: var(--border); color: var(--text); }
-        .actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
-        .errorlist { color: #ef4444; font-size: 0.8rem; list-style: none; margin-top: 0.3rem; }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-brand">🏪 Ipo-Ipo <small>Point of Sale</small></div>
-        <div class="nav-section">Menu</div>
-        <a class="nav-item{% if nav_active == 'dashboard' %} active{% endif %}" href="{% url 'home' %}">📊 Dashboard</a>
-        <a class="nav-item{% if nav_active == 'sales' %} active{% endif %}" href="{% url 'sales_history' %}">📋 Sales</a>
-        <a class="nav-item{% if nav_active == 'products' %} active{% endif %}" href="{% url 'product_catalog' %}">📦 Products</a>
-        <a class="nav-item{% if nav_active == 'categories' %} active{% endif %}" href="{% url 'category_list' %}">🏷️ Categories</a>
-        <a class="nav-item{% if nav_active == 'customers' %} active{% endif %}" href="{% url 'customers' %}">👥 Customers</a>
-        <a class="nav-item{% if nav_active == 'reports' %} active{% endif %}" href="{% url 'reports' %}">📈 Reports</a>
-        <div class="nav-section">Management</div>
-        <a class="nav-item{% if nav_active == 'inventory' %} active{% endif %}" href="{% url 'inventory_dashboard' %}">🏷️ Inventory</a>
-        <a class="nav-item{% if nav_active == 'discounts' %} active{% endif %}" href="{% url 'discount_list' %}">🏷️ Discount Types</a>
-    </div>
-    <div class="main">
-        <h1>{% if form.instance.pk %}✏️ Edit Discount{% else %}➕ Add Discount{% endif %}</h1>
-        <div class="card">
-            <form method="post">
-                {% csrf_token %}
-                {% for field in form %}
-                <div class="form-group">
-                    <label>{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}<small style="color:var(--text-muted);font-size:0.75rem;display:block;margin-top:0.2rem;">{{ field.help_text }}</small>{% endif %}
-                    {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
-                </div>
-                {% endfor %}
-                <div class="actions">
-                    <button type="submit" class="btn btn-primary">💾 Save</button>
-                    <a href="{% url 'discount_list' %}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — {% if form.instance.pk %}Edit{% else %}Add{% endif %} Discount{% endblock %}
+
+{% block breadcrumb %}<h2>{% if form.instance.pk %}✏️ Edit Discount{% else %}➕ Add Discount{% endif %}</h2>{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group">
+            <label>{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+            {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
         </div>
-    </div>
-</body>
-</html>
+        {% endfor %}
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">💾 Save</button>
+            <a href="{% url 'discount_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

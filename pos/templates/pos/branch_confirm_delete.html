@@ -1,0 +1,20 @@
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — Delete Branch{% endblock %}
+
+{% block breadcrumb %}<h2>🗑️ Delete Branch</h2>{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:500px">
+    <p style="margin-bottom:1rem">Are you sure you want to delete <strong>{{ branch.name }}</strong> ({{ branch.code }})?</p>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem">This action cannot be undone.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="actions">
+            <button type="submit" class="btn btn-danger">🗑️ Yes, Delete</button>
+            <a href="{% url 'branch_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

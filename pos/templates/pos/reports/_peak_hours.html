@@ -1,0 +1,43 @@
+{% if report_data.hours %}
+    {% with max_count=report_data.hours.0.count %}
+    {% with display_hours=report_data.hours %}
+    <div class="peak-bars">
+        {% for h in display_hours %}
+        {% with raw_pct=h.count %}
+        {% with pct=h.count %}
+        <div class="peak-bar" style="height: {% widthratio h.count 1 120 %}px;max-height:120px;{% if h.count == display_hours.0.count %}height:120px{% endif %}"
+             title="{{ h.label }} — {{ h.count }} transactions, ₱{{ h.sales|floatformat:2 }}">
+            <span class="count" style="{% if h.count < 1 %}display:none{% endif %}">{{ h.count }}</span>
+            <span class="label">{{ h.label }}</span>
+        </div>
+        {% endwith %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% endwith %}
+    {% endwith %}
+
+    <table style="margin-top:1.5rem">
+        <thead>
+            <tr>
+                <th>Hour</th>
+                <th class="text-right">Transactions</th>
+                <th class="text-right">Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for h in report_data.hours %}
+            <tr>
+                <td class="fw-bold">{{ h.label }}</td>
+                <td class="text-right">{{ h.count }}</td>
+                <td class="text-right text-success mono">₱{{ h.sales|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="icon">⏰</div>
+        <p>No transaction data for this period.</p>
+    </div>
+{% endif %}

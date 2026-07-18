@@ -1,126 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — Reports</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4f46e5; --primary-light: #818cf8;
-            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
-            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155;
-            --border: #334155; --text: #e2e8f0; --text-muted: #94a3b8;
-            --radius: 12px; --radius-sm: 8px;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text);
-            min-height: 100vh; display: flex;
-        }
-        .sidebar {
-            width: 240px; background: #111827;
-            border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
-        }
-        .sidebar-brand { display: flex; align-items: center; gap: 0.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; }
-        .sidebar-brand .icon { font-size: 1.75rem; width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
-        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
-        .nav-section { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem; }
-        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s; }
-        .nav-item:hover { background: var(--bg-input); color: var(--text); }
-        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
-        .sidebar-footer .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #06b6d4); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; }
-        .sidebar-footer .info { font-size: 0.8rem; }
-        .sidebar-footer .info .name { font-weight: 600; }
-        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-        .topbar-left { display: flex; align-items: center; gap: 1rem; }
-        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
-        .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-        .stat-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 0.4rem; }
-        .stat-card .value { font-size: 1.75rem; font-weight: 700; }
-        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
-        .card-header h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 0.7rem 0.75rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); }
-        td { padding: 0.7rem 0.75rem; font-size: 0.85rem; border-bottom: 1px solid rgba(51,65,85,0.3); }
-    </style>
-</head>
-<body>
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <div class="icon">🏪</div>
-            <h1>Ipo-Ipo<small>Reports</small></h1>
-        </div>
-        {% url 'home' as home_url %}
-        {% url 'product_catalog' as products_url %}
-        {% url 'customers' as customers_url %}
-        {% url 'sales_history' as sales_url %}
-        {% url 'inventory_dashboard' as inventory_url %}
-        <div class="nav-section">Menu</div>
-        <a class="nav-item" href="{{ home_url }}">📊 Dashboard</a>
-        <a class="nav-item" href="{{ sales_url }}">📋 Sales</a>
-        <a class="nav-item" href="{{ products_url }}">📦 Products</a>
-        <a class="nav-item" href="{{ customers_url }}">👥 Customers</a>
-        <a class="nav-item active" href="#">📈 Reports</a>
-        <div class="nav-section" style="margin-top:1.5rem">Management</div>
-        <a class="nav-item" href="{{ inventory_url }}">🏷️ Inventory</a>
-        <div class="sidebar-footer">
-            <div class="avatar">I</div>
-            <div class="info"><div class="name">Ipo-Ipo POS</div><div class="role">Offline App</div></div>
-        </div>
-    </div>
-    <div class="main">
-        <div class="topbar">
-            <div class="topbar-left">
-                <h2>📈 Reports</h2>
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — Reports{% endblock %}
+
+{% block breadcrumb %}
+<h2>Reports</h2>
+{% url 'home' as crumb_home_url %}<div class="breadcrumb"><a href="{{ crumb_home_url }}">Dashboard</a><span class="sep">/</span><span>Reports</span></div>
+{% endblock %}
+
+{% block content %}
+<style>
+    .report-tab.active { background: rgba(13,148,136,0.08) !important; border-color: var(--primary) !important; color: var(--primary) !important; font-weight: 600; }
+</style>
+<!-- Date Filter -->
+<div class="card">
+    {% url 'reports' as report_list_url %}<form method="GET" action="{{ report_list_url }}">
+        <div class="filter-bar">
+            <div class="field">
+                <label>From</label>
+                <input type="date" name="from" value="{{ request.GET.from|default:'' }}">
             </div>
-        </div>
-        <div class="content">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="label">Total Sales</div>
-                    <div class="value" style="color:var(--success)">₱{{ total_sales|floatformat:2 }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Transactions</div>
-                    <div class="value">{{ total_transactions }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="label">Avg per Transaction</div>
-                    <div class="value">
-                            ₱{{ avg_per_txn|floatformat:2 }}
-                    </div>
-                </div>
+            <div class="field">
+                <label>To</label>
+                <input type="date" name="to" value="{{ request.GET.to|default:'' }}">
             </div>
-            <div class="card">
-                <div class="card-header"><h3>🥇 Top Selling Items</h3></div>
-                {% if top_items %}
-                <table>
-                    <thead>
-                        <tr><th>#</th><th>Item</th><th>Qty Sold</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for item in top_items %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ item.item__emoji|default:"📦" }} {{ item.item__name }}</td>
-                            <td style="font-weight:600">{{ item.total_qty }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p style="color:var(--text-muted);text-align:center;padding:2rem">No sales data yet. Process some transactions first.</p>
-                {% endif %}
+            <div class="field">
+                <label>Group By</label>
+                <select name="group">
+                    <option value="day" {% if group_by == 'day' %}selected{% endif %}>Daily</option>
+                    <option value="week" {% if group_by == 'week' %}selected{% endif %}>Weekly</option>
+                    <option value="month" {% if group_by == 'month' %}selected{% endif %}>Monthly</option>
+                </select>
             </div>
+            <button class="btn btn-primary" type="submit">Generate</button>
+            {% if request.GET.from or request.GET.to %}
+            <a href="{{ report_list_url }}" class="btn btn-sm btn-ghost">Clear</a>
+            {% endif %}
         </div>
-    </div>
-</body>
-</html>
+    </form>
+</div>
+
+<!-- Report Tabs -->
+<div class="report-tabs">
+    <a class="report-tab {% if active_tab == 'daily_sales' %}active{% endif %}" href="{{ report_list_url }}?tab=daily_sales{% if request.GET.from %}&from={{ request.GET.from }}{% endif %}{% if request.GET.to %}&to={{ request.GET.to }}{% endif %}">📅 Daily Sales</a>
+    <a class="report-tab {% if active_tab == 'best_selling' %}active{% endif %}" href="{{ report_list_url }}?tab=best_selling{% if request.GET.from %}&from={{ request.GET.from }}{% endif %}{% if request.GET.to %}&to={{ request.GET.to }}{% endif %}">🥇 Best Selling</a>
+    <a class="report-tab {% if active_tab == 'peak_hours' %}active{% endif %}" href="{{ report_list_url }}?tab=peak_hours{% if request.GET.from %}&from={{ request.GET.from }}{% endif %}{% if request.GET.to %}&to={{ request.GET.to }}{% endif %}">⏰ Peak Hours</a>
+    <a class="report-tab {% if active_tab == 'shift_sales' %}active{% endif %}" href="{{ report_list_url }}?tab=shift_sales{% if request.GET.from %}&from={{ request.GET.from }}{% endif %}{% if request.GET.to %}&to={{ request.GET.to }}{% endif %}">🔄 Shift Sales</a>
+    <a class="report-tab {% if active_tab == 'expenses' %}active{% endif %}" href="{{ report_list_url }}?tab=expenses{% if request.GET.from %}&from={{ request.GET.from }}{% endif %}{% if request.GET.to %}&to={{ request.GET.to }}{% endif %}">💸 Expenses</a>
+</div>
+
+<!-- Report Content -->
+<div class="card">
+    {% if active_tab == 'daily_sales' %}
+        {% include "pos/reports/_daily_sales.html" %}
+    {% elif active_tab == 'best_selling' %}
+        {% include "pos/reports/_best_selling.html" %}
+    {% elif active_tab == 'peak_hours' %}
+        {% include "pos/reports/_peak_hours.html" %}
+    {% elif active_tab == 'shift_sales' %}
+        {% include "pos/reports/_shift_sales.html" %}
+    {% elif active_tab == 'expenses' %}
+        {% include "pos/reports/_expenses.html" %}
+    {% else %}
+        <div class="empty">
+            <span class="icon">📊</span>
+            <p>Select a report tab and date range above to generate insights.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

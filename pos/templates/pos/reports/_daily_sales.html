@@ -1,0 +1,45 @@
+{% if report_data.grouped %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width:50%">Item</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in report_data.grouped %}
+            <tr class="cat-header">
+                <td colspan="3">
+                    {% if group.emoji %}{{ group.emoji }}{% endif %}
+                    {{ group.category }}
+                </td>
+            </tr>
+            {% for item in group.items %}
+            <tr>
+                <td>
+                    {% if item.emoji %}{{ item.emoji }} {% endif %}{{ item.name }}
+                </td>
+                <td class="text-right">{{ item.qty }}</td>
+                <td class="text-right mono">₱{{ item.total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="cat-sub">
+                <td class="text-right">Subtotal</td>
+                <td class="text-right">{{ group.category_qty }}</td>
+                <td class="text-right fw-bold">₱{{ group.category_total|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="grand-total">
+                <td class="fw-bold">GRAND TOTAL</td>
+                <td class="text-right fw-bold">{{ report_data.grand_qty }}</td>
+                <td class="text-right text-success fw-bold">₱{{ report_data.grand_total|floatformat:2 }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>No completed transactions found for this period.</p>
+    </div>
+{% endif %}

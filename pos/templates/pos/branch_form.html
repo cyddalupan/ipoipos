@@ -1,0 +1,75 @@
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — {{ title }}{% endblock %}
+
+{% block breadcrumb %}<h2>{{ title }}</h2>{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:600px">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Branch Code</label>
+            <input type="text" name="code" class="form-control" value="{{ branch.code|default:'' }}" required placeholder="e.g. LPG-01">
+            <div class="help">Short unique code for this branch</div>
+        </div>
+        <div class="form-group">
+            <label>Branch Name</label>
+            <input type="text" name="name" class="form-control" value="{{ branch.name|default:'' }}" required placeholder="e.g. Main LPG Branch">
+        </div>
+        <div class="form-group">
+            <label>Branch Type</label>
+            <select name="type" class="form-control" required>
+                <option value="">— Select —</option>
+                <option value="LPG" {% if branch.type == 'LPG' %}selected{% endif %}>LPG Refilling Station</option>
+                <option value="AGRI" {% if branch.type == 'AGRI' %}selected{% endif %}>Agricultural Supply</option>
+                <option value="GAS" {% if branch.type == 'GAS' %}selected{% endif %}>Gas Station</option>
+                <option value="RETAIL" {% if branch.type == 'RETAIL' %}selected{% endif %}>Retail Store</option>
+                <option value="WHOLESALE" {% if branch.type == 'WHOLESALE' %}selected{% endif %}>Wholesale</option>
+                <option value="SERVICE" {% if branch.type == 'SERVICE' %}selected{% endif %}>Service Business</option>
+                <option value="MANUFACTURING" {% if branch.type == 'MANUFACTURING' %}selected{% endif %}>Manufacturing</option>
+                <option value="FOOD" {% if branch.type == 'FOOD' %}selected{% endif %}>Food & Restaurant</option>
+                <option value="HEALTH" {% if branch.type == 'HEALTH' %}selected{% endif %}>Health & Pharmacy</option>
+                <option value="EDUCATION" {% if branch.type == 'EDUCATION' %}selected{% endif %}>Education</option>
+                <option value="TRANSPORT" {% if branch.type == 'TRANSPORT' %}selected{% endif %}>Transport & Logistics</option>
+                <option value="CONSTRUCTION" {% if branch.type == 'CONSTRUCTION' %}selected{% endif %}>Construction</option>
+                <option value="TECH" {% if branch.type == 'TECH' %}selected{% endif %}>Technology</option>
+                <option value="OTHER" {% if branch.type == 'OTHER' %}selected{% endif %}>Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Tax Rate (%)</label>
+            <input type="number" name="tax_rate" class="form-control" value="{{ branch.tax_rate|default:'12.00' }}" step="0.01" min="0" max="100">
+        </div>
+        <div class="form-group">
+            <label>Currency</label>
+            <input type="text" name="currency" class="form-control" value="{{ branch.currency|default:'PHP' }}">
+        </div>
+        <div class="form-group">
+            <label>Address</label>
+            <textarea name="address" class="form-control" rows="2">{{ branch.address|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Contact</label>
+            <input type="text" name="contact" class="form-control" value="{{ branch.contact|default:'' }}">
+        </div>
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" class="form-control" rows="2">{{ branch.notes|default:'' }}</textarea>
+        </div>
+        {% if branch %}
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_active" {% if branch.is_active %}checked{% endif %}>
+                Active
+            </label>
+        </div>
+        {% endif %}
+        <div class="actions">
+            <button type="submit" class="btn btn-primary">💾 Save</button>
+            <a href="{% url 'branch_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

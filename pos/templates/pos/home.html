@@ -1,393 +1,249 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — Dashboard</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #4f46e5; --primary-dark: #4338ca; --primary-light: #818cf8;
-            --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
-            --gray-50: #f9fafb; --gray-100: #f3f4f6; --gray-200: #e5e7eb;
-            --gray-300: #d1d5db; --gray-400: #9ca3af; --gray-500: #6b7280;
-            --gray-600: #4b5563; --gray-700: #374151; --gray-800: #1f2937; --gray-900: #111827;
-            --bg: #0f172a; --bg-card: #1e293b; --bg-input: #334155; --border: #334155;
-            --text: #e2e8f0; --text-muted: #94a3b8;
-            --radius: 12px; --radius-sm: 8px;
-        }
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg); color: var(--text); min-height: 100vh; display: flex;
-        }
-        .sidebar {
-            width: 240px; background: var(--gray-900); border-right: 1px solid var(--border);
-            padding: 1.25rem; display: flex; flex-direction: column; flex-shrink: 0;
-        }
-        .sidebar-brand {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem;
-        }
-        .sidebar-brand .icon {
-            font-size: 1.75rem; width: 42px; height: 42px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: 10px; display: flex; align-items: center; justify-content: center;
-        }
-        .sidebar-brand h1 { font-size: 1.1rem; font-weight: 700; line-height: 1.2; }
-        .sidebar-brand small { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 400; }
-        .nav-section {
-            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em;
-            color: var(--text-muted); margin: 1rem 0 0.5rem 0.5rem;
-        }
-        .nav-item {
-            display: flex; align-items: center; gap: 0.75rem;
-            padding: 0.6rem 0.75rem; border-radius: var(--radius-sm);
-            color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: all 0.15s;
-        }
-        .nav-item:hover { background: var(--bg-input); color: var(--text); }
-        .nav-item.active { background: rgba(79,70,229,0.15); color: var(--primary-light); font-weight: 600; }
-        .nav-item .badge {
-            margin-left: auto; background: var(--danger); color: white;
-            font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.45rem; border-radius: 999px;
-        }
-        .sidebar-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
-        .sidebar-footer .avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #06b6d4);
-            display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;
-        }
-        .sidebar-footer .info { font-size: 0.8rem; }
-        .sidebar-footer .info .name { font-weight: 600; }
-        .sidebar-footer .info .role { color: var(--text-muted); font-size: 0.7rem; }
+{% extends "pos/base.html" %}
+{% load static %}
 
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+{% block title %}CASSEY — Dashboard{% endblock %}
 
-        .topbar {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .topbar-left { display: flex; align-items: center; gap: 1rem; }
-        .topbar-left h2 { font-size: 1.1rem; font-weight: 600; }
-        .topbar-left .date { color: var(--text-muted); font-size: 0.8rem; }
-        .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+{% block breadcrumb %}
+<h2>Dashboard</h2>
+<span class="date" id="currentDate" style="color:var(--text-muted-content);font-size:0.8rem;"></span>
+{% endblock %}
 
-        .search-box {
-            display: flex; align-items: center; background: var(--bg-input);
-            border: 1px solid var(--border); border-radius: var(--radius-sm);
-            padding: 0.4rem 0.75rem; gap: 0.5rem;
-        }
-        .search-box input {
-            background: none; border: none; color: var(--text);
-            font-size: 0.85rem; outline: none; width: 180px;
-        }
-        .search-box input::placeholder { color: var(--text-muted); }
+{% block topbar_right %}
+<div class="topbar-right">
+    {% if current_branch %}
+    <span style="font-size:0.75rem;color:var(--text-muted-content);margin-right:0.5rem;display:inline-flex;align-items:center;gap:0.3rem;">
+        <span>{% if current_branch.type == "LPG" %}🔥{% elif current_branch.type == "AGRI" %}🌾{% elif current_branch.type == "GAS" %}⛽{% elif current_branch.type == "RETAIL" %}🛒{% elif current_branch.type == "WHOLESALE" %}📦{% elif current_branch.type == "SERVICE" %}🔧{% elif current_branch.type == "MANUFACTURING" %}🏭{% elif current_branch.type == "FOOD" %}🍽️{% elif current_branch.type == "HEALTH" %}💊{% elif current_branch.type == "EDUCATION" %}📚{% elif current_branch.type == "TRANSPORT" %}🚚{% elif current_branch.type == "CONSTRUCTION" %}🏗️{% elif current_branch.type == "TECH" %}💻{% else %}🏪{% endif %}</span>
+        {{ current_branch.name }}
+    </span>
+    <a href="{% url 'branch_select' %}" style="font-size:0.75rem;color:var(--primary);text-decoration:none;margin-right:0.75rem;">🔄 Change</a>
+    {% endif %}
+    {% url 'home' as home_url %}
+    {% url 'product_catalog' as products_url %}
+    {% url 'inventory_dashboard' as inventory_url %}
+    {% url 'sales_history' as sales_url %}
+    <form class="search-box" method="GET" action="{{ home_url }}" id="searchForm">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#94a3b8;stroke-width:2;fill:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" name="q" placeholder="Search products..." value="{{ request.GET.q|default:'' }}" id="searchInput">
+        {% if request.GET.q %}
+        <a href="{{ home_url }}" style="color:var(--text-muted-content);font-size:0.8rem;">✕</a>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}
 
-        .content { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-        .stat-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 1.25rem; transition: border-color 0.15s;
-        }
-        .stat-card:hover { border-color: var(--gray-500); }
-        .stat-card .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 0.4rem; }
-        .stat-card .value { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
-        .stat-card .sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem; }
-
-        .panels { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; flex: 1; min-height: 0; }
-        .panel {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden;
-        }
-        .panel-header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0;
-        }
-        .panel-header h3 { font-size: 0.95rem; font-weight: 600; }
-        .panel-header .action { font-size: 0.8rem; color: var(--primary-light); cursor: pointer; }
-        .panel-header .action:hover { text-decoration: underline; }
-
-        /* Product Grid */
-        .product-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 0.75rem; padding: 1rem; overflow-y: auto; flex: 1;
-        }
-        .product-tile {
-            background: var(--bg-input); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 0.75rem; text-align: center;
-            cursor: pointer; transition: all 0.15s; user-select: none;
-        }
-        .product-tile:hover { border-color: var(--primary); background: rgba(79,70,229,0.1); transform: translateY(-1px); }
-        .product-tile:active { transform: translateY(0); }
-        .product-tile.out-of-stock { opacity: 0.4; cursor: not-allowed; }
-        .product-tile.out-of-stock:hover { border-color: var(--border); background: var(--bg-input); transform: none; }
-        .product-tile .emoji { font-size: 2rem; display: block; margin-bottom: 0.3rem; }
-        .product-tile img.emoji-img { width: 2rem; height: 2rem; object-fit: contain; display: block; margin: 0 auto 0.3rem; }
-        .product-tile .name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .product-tile .price { font-size: 0.9rem; font-weight: 700; color: var(--success); margin-top: 0.15rem; }
-        .product-tile .stock { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.1rem; }
-
-        /* Cart Right Panel */
-        .cart-empty {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            color: var(--text-muted); font-size: 0.85rem; flex-direction: column; gap: 0.5rem;
-        }
-        .cart-items {
-            flex: 1; overflow-y: auto; padding: 0.75rem 1rem;
-        }
-        .cart-item {
-            display: flex; align-items: center; padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(51,65,85,0.3); gap: 0.5rem;
-        }
-        .cart-item:last-child { border-bottom: none; }
-        .cart-item .item-info { flex: 1; min-width: 0; }
-        .cart-item .item-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cart-item .item-sub { font-size: 0.7rem; color: var(--text-muted); }
-        .cart-item .qty-ctrl { display: flex; align-items: center; gap: 0.3rem; }
-        .cart-item .qty-ctrl button {
-            width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border);
-            background: var(--bg-input); color: var(--text); cursor: pointer;
-            font-size: 0.9rem; display: flex; align-items: center; justify-content: center; line-height: 1;
-        }
-        .cart-item .qty-ctrl button:hover { background: var(--gray-600); }
-        .cart-item .qty-ctrl span { font-size: 0.85rem; font-weight: 600; min-width: 20px; text-align: center; }
-        .cart-item .item-total { font-size: 0.85rem; font-weight: 600; color: var(--success); min-width: 70px; text-align: right; }
-        .cart-item .remove-btn {
-            background: none; border: none; color: var(--danger); cursor: pointer;
-            font-size: 0.85rem; padding: 0.2rem; opacity: 0.6;
-        }
-        .cart-item .remove-btn:hover { opacity: 1; }
-
-        .cart-footer {
-            border-top: 1px solid var(--border); padding: 1rem 1.25rem;
-            display: flex; flex-direction: column; gap: 0.6rem;
-        }
-        .cart-footer .row { display: flex; justify-content: space-between; font-size: 0.85rem; }
-        .cart-footer .row.total { font-size: 1.1rem; font-weight: 700; border-top: 1px solid var(--border); padding-top: 0.6rem; margin-top: 0.2rem; }
-        .cart-footer .row.total .val { color: var(--success); }
-
-        .discount-row select {
-            width: 100%; padding: 0.45rem 0.6rem; border-radius: var(--radius-sm);
-            border: 1px solid var(--border); background: var(--bg-input); color: var(--text);
-            font-size: 0.8rem; outline: none;
-        }
-
-        .pay-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
-        .pay-btn {
-            padding: 0.55rem; border-radius: var(--radius-sm); border: 1px solid var(--border);
-            background: var(--bg-input); color: var(--text-muted); cursor: pointer;
-            font-size: 0.75rem; font-weight: 600; text-align: center; transition: all 0.15s;
-        }
-        .pay-btn:hover { border-color: var(--gray-500); color: var(--text); }
-        .pay-btn.active { border-color: var(--primary); background: rgba(79,70,229,0.15); color: var(--primary-light); }
-        .pay-btn .pay-icon { display: block; font-size: 1.1rem; margin-bottom: 0.15rem; }
-
-        .checkout-btn {
-            width: 100%; padding: 0.75rem; border-radius: var(--radius-sm);
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border: none; color: white; font-size: 1rem; font-weight: 700;
-            cursor: pointer; transition: all 0.15s;
-        }
-        .checkout-btn:hover { filter: brightness(1.1); }
-        .checkout-btn:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
-
-        /* Discount summary */
-        .cart-footer .row.discounted { color: var(--warning); }
-
-        /* Modal */
-        .modal-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-            z-index: 1000; align-items: center; justify-content: center;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-content {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 2rem; max-width: 420px; width: 90%;
-            max-height: 80vh; overflow-y: auto;
-        }
-        .modal-content h2 { margin-bottom: 1rem; font-size: 1.3rem; text-align: center; }
-        .modal-content .receipt-line { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; }
-        .modal-content .receipt-line.total { font-weight: 700; border-top: 1px dashed var(--border); padding-top: 0.6rem; margin-top: 0.4rem; font-size: 1rem; }
-        .modal-content .receipt-divider { border: none; border-top: 1px dashed var(--border); margin: 0.6rem 0; }
-        .modal-content .ok-btn {
-            margin-top: 1.25rem; width: 100%; padding: 0.75rem;
-            border-radius: var(--radius-sm); background: var(--primary);
-            border: none; color: white; font-size: 1rem; font-weight: 700; cursor: pointer;
-        }
-        .modal-content .ok-btn:hover { background: var(--primary-dark); }
-        .modal-content .receipt-txn-id { text-align: center; color: var(--text-muted); font-size: 0.75rem; margin-bottom: 0.75rem; }
-
-        .btn-icon { display: inline-flex; align-items: center; justify-content: center; }
-
-        .empty-product-msg {
-            grid-column: 1 / -1; text-align: center; color: var(--text-muted);
-            padding: 2rem; font-size: 0.9rem;
-        }
-
-        a { color: var(--primary-light); text-decoration: none; }
-        a:hover { text-decoration: underline; }
-    </style>
-</head>
-<body>
-<div class="sidebar">
-    <div class="sidebar-brand">
-        <div class="icon">🍜</div>
-        <div>
-            <h1>Ipo-Ipo</h1>
-            <small>Point of Sale</small>
-        </div>
+{% block content %}
+<div class="stats-grid">
+    <div class="card">
+        <div class="label" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted-content);margin-bottom:0.4rem;">Today's Sales</div>
+        <div class="value" style="font-size:1.75rem;font-weight:700;color:var(--primary);">₱{{ today_sales|floatformat:2 }}</div>
+        <div class="sub" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.25rem;">Gross revenue</div>
     </div>
-    <div class="nav-section">Main Menu</div>
-    <a class="nav-item active" href="{{ home_url }}">📊 Dashboard</a>
-    <a class="nav-item" href="{{ inventory_url }}">📦 Inventory</a>
-    <a class="nav-item" href="{{ category_url }}">📂 Categories</a>
-    <a class="nav-item" href="{{ discount_url }}">🏷️ Discounts</a>
-    <div class="nav-section">Reports</div>
-    <a class="nav-item" href="{{ sales_url }}">🧾 Sales History</a>
-    <a class="nav-item" href="{{ reports_url }}">📈 Reports</a>
-    <div class="nav-section">Management</div>
-    <a class="nav-item" href="{{ products_url }}">🛒 Products</a>
-    <a class="nav-item" href="{{ customers_url }}">👥 Customers</a>
-    <div class="sidebar-footer">
-        <div class="avatar">IP</div>
-        <div class="info">
-            <div class="name">Ipo-Ipo POS</div>
-            <div class="role">Offline Terminal</div>
-        </div>
+    <div class="card">
+        <div class="label" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted-content);margin-bottom:0.4rem;">Avg. Ticket</div>
+        <div class="value" style="font-size:1.75rem;font-weight:700;color:var(--warning);">₱{{ avg_ticket|floatformat:2 }}</div>
+        <div class="sub" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.25rem;">Per transaction</div>
+    </div>
+    <div class="card">
+        <div class="label" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted-content);margin-bottom:0.4rem;">Active Orders</div>
+        <div class="value" style="font-size:1.75rem;font-weight:700;color:var(--info);">{{ active_orders }}</div>
+        <div class="sub" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.25rem;">Completed today</div>
+    </div>
+    <div class="card">
+        <div class="label" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted-content);margin-bottom:0.4rem;">Low Stock</div>
+        <div class="value" style="font-size:1.75rem;font-weight:700;color:var(--danger);">{{ low_stock_count }}</div>
+        <div class="sub" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.25rem;">Items below threshold</div>
     </div>
 </div>
-<div class="main">
-    <div class="topbar">
-        <div class="topbar-left">
-            <h2>Dashboard</h2>
-            <span class="date" id="currentDate"></span>
+
+<div class="chart-grid">
+    <div class="card chart-card">
+        <div class="card-header"><h3>📈 Daily Sales (7 days)</h3></div>
+        <div id="chart-sales-trend" style="width:100%;min-height:200px;"></div>
+    </div>
+    <div class="card chart-card">
+        <div class="card-header"><h3>💳 Payment Methods</h3></div>
+        <div id="chart-payment-methods" style="width:100%;min-height:200px;"></div>
+    </div>
+    <div class="card chart-card">
+        <div class="card-header"><h3>🏆 Top Selling Items</h3></div>
+        <div id="chart-top-items" style="width:100%;min-height:200px;"></div>
+    </div>
+    <div class="card chart-card">
+        <div class="card-header"><h3>⏰ Peak Hours</h3></div>
+        <div id="chart-hourly" style="width:100%;min-height:180px;"></div>
+    </div>
+    <div class="card chart-card" style="grid-column:1/-1;">
+        <div class="card-header"><h3>📊 Sales by Category</h3></div>
+        <div id="chart-categories" style="width:100%;min-height:150px;"></div>
+    </div>
+</div>
+
+<style>
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.chart-card { padding: 1rem; }
+.chart-card .card-header { padding: 0 0 0.75rem 0; margin: 0; border-bottom: 1px solid var(--border-light); margin-bottom: 0.75rem; }
+.chart-card .card-header h3 { font-size: 0.85rem; font-weight: 600; }
+@media (max-width: 900px) { .chart-grid { grid-template-columns: 1fr; } }
+</style>
+
+<div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;flex:1;min-height:0;">
+
+    <div class="card" style="display:flex;flex-direction:column;overflow:hidden;padding:0;">
+        <div class="card-header" style="padding:1rem 1.25rem;margin:0;border-bottom:1px solid var(--border-light);">
+            <h3><svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:0.3rem;stroke:var(--primary);stroke-width:1.5;fill:none;"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg> Products</h3>
+            <a class="action-link" href="{{ products_url }}">View All</a>
         </div>
-        <div class="topbar-right">
-            <form class="search-box" method="GET" action="{{ home_url }}" id="searchForm">
-                <span>🔍</span>
-                <input type="text" name="q" placeholder="Search products..." value="{{ request.GET.q|default:'' }}" id="searchInput">
-                {% if request.GET.q %}
-                <a href="{{ home_url }}" style="color:var(--text-muted);font-size:0.8rem;">✕</a>
-                {% endif %}
-            </form>
+        <div class="category-filter" style="padding:0 1.25rem 0.5rem;display:flex;gap:0.35rem;flex-wrap:wrap;border-bottom:1px solid var(--border-light);">
+            <button class="cat-btn active" data-category="all" onclick="filterCategory(this,'all')" style="padding:0.3rem 0.7rem;border:1px solid var(--border-light);border-radius:var(--radius-xs);background:var(--bg-input);cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s;">All</button>
+            {% for c in categories %}
+            <button class="cat-btn" data-category="cat-{{ c.id }}" onclick="filterCategory(this,'cat-{{ c.id }}')" style="padding:0.3rem 0.7rem;border:1px solid var(--border-light);border-radius:var(--radius-xs);background:var(--bg-input);cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s;">{{ c.name }}</button>
+            {% endfor %}
+        </div>
+        <div class="product-grid" id="productGrid" style="padding:1rem;overflow-y:auto;flex:1;">
+            {% for item in items %}
+            <div class="product-tile {% if item.stock_qty <= 0 %}out-of-stock{% endif %}"
+                 data-id="{{ item.id }}"
+                 data-name="{{ item.name }}"
+                 data-price="{{ item.selling_price }}"
+                 data-category="cat-{{ item.category_id }}"
+                 data-emoji="{{ item.emoji|default:'📦' }}"
+                 data-stock="{{ item.stock_qty }}"
+                 data-has-sizes="{% if item.sizes.all %}true{% else %}false{% endif %}"
+                 data-sizes='{% if item.sizes.all %}[{% for s in item.sizes.all %}{"name":"{{ s.name }}","price":"{{ s.price }}"}{% if not forloop.last %},{% endif %}{% endfor %}]{% endif %}'
+                 onclick="addToCart(this)"
+                 style="background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;text-align:center;cursor:pointer;transition:all 0.15s;user-select:none;">
+                {% if item.emoji %}<span style="font-size:2rem;display:block;margin-bottom:0.3rem;">{{ item.emoji }}</span>{% endif %}
+                <div style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.name }}</div>
+                <div style="font-size:0.9rem;font-weight:700;color:var(--success);margin-top:0.15rem;">₱{{ item.selling_price|floatformat:2 }}</div>
+                <div style="font-size:0.65rem;color:var(--text-muted-content);margin-top:0.1rem;">Stock: {{ item.stock_qty }}</div>
+                {% if item.sizes.all %}<div class="size-badge" style="font-size:0.6rem;margin-top:0.25rem;color:var(--primary);font-weight:600;">📐 Has sizes</div>{% endif %}
+            </div>
+            {% empty %}
+            <div class="empty">
+                <span class="icon">📦</span>
+                <p>{% if request.GET.q %}No products found matching "{{ request.GET.q }}"{% else %}No products yet — <a class="action-link" href="{{ inventory_url }}">add some inventory</a>{% endif %}</p>
+            </div>
+            {% endfor %}
         </div>
     </div>
-    <div class="content">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="label">Today's Sales</div>
-                <div class="value">₱{{ today_sales|floatformat:2 }}</div>
-                <div class="sub">Gross revenue</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Avg. Ticket</div>
-                <div class="value">₱{{ avg_ticket|floatformat:2 }}</div>
-                <div class="sub">Per transaction</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Active Orders</div>
-                <div class="value">{{ active_orders }}</div>
-                <div class="sub">Completed today</div>
-            </div>
-            <div class="stat-card">
-                <div class="label">Low Stock</div>
-                <div class="value">{{ low_stock_count }}</div>
-                <div class="sub">Items below threshold</div>
+
+    <div class="card" style="display:flex;flex-direction:column;overflow:hidden;padding:0;">
+        <div class="card-header" style="padding:1rem 1.25rem;margin:0;border-bottom:1px solid var(--border-light);">
+            <h3><svg viewBox="0 0 24 24" style="width:18px;height:18px;vertical-align:middle;margin-right:0.3rem;stroke:var(--primary);stroke-width:1.5;fill:none;"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Cart</h3>
+            <span class="action-link" onclick="clearCart()" id="clearCartBtn" style="display:none;">Clear</span>
+        </div>
+        <div class="cart-items" id="cartItems" style="flex:1;overflow-y:auto;padding:0.75rem 1rem;">
+            <div class="empty" style="padding:2rem;">
+                <span class="icon" style="font-size:2rem;">🛒</span>
+                <p>Tap products to add</p>
             </div>
         </div>
-        <div class="panels">
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>🛍️ Products</h3>
-                    <a class="action" href="{{ products_url }}">View All</a>
-                </div>
-                <div class="product-grid" id="productGrid">
-                    {% for item in items %}
-                    <div class="product-tile {% if item.stock_qty <= 0 %}out-of-stock{% endif %}"
-                         data-id="{{ item.id }}"
-                         data-name="{{ item.name }}"
-                         data-price="{{ item.selling_price }}"
-                         data-emoji="{{ item.emoji|default:'📦' }}"
-                         data-stock="{{ item.stock_qty }}"
-                         onclick="addToCart(this)">
-                        {% if item.emoji %}<span class="emoji">{{ item.emoji }}</span>{% endif %}
-                        <div class="name">{{ item.name }}</div>
-                        <div class="price">₱{{ item.selling_price|floatformat:2 }}</div>
-                        <div class="stock">Stock: {{ item.stock_qty }}</div>
-                    </div>
-                    {% empty %}
-                    <div class="empty-product-msg">
-                        {% if request.GET.q %}
-                            No products found matching "{{ request.GET.q }}"
-                        {% else %}
-                            No products yet — <a href="{{ inventory_url }}">add some inventory</a>
-                        {% endif %}
-                    </div>
+        <div class="cart-footer" id="cartFooter" style="display:none;border-top:1px solid var(--border-light);padding:1rem 1.25rem;">
+            <div style="margin-bottom:0.5rem;">
+                <select id="discountSelect" onchange="updateCart()" style="width:100%;padding:0.45rem 0.6rem;border:1px solid var(--border-light);border-radius:var(--radius-xs);font-size:0.8rem;">
+                    <option value="">No Discount</option>
+                    {% for d in discounts %}
+                    <option value="{{ d.id }}">{{ d.name }} ({% if d.kind == 'PERCENTAGE' %}{{ d.value }}%{% else %}₱{{ d.value }}{% endif %})</option>
                     {% endfor %}
-                </div>
+                </select>
             </div>
-            <div class="panel">
-                <div class="panel-header">
-                    <h3>🛒 Cart</h3>
-                    <span class="action" onclick="clearCart()" id="clearCartBtn" style="display:none;">Clear</span>
-                </div>
-                <div class="cart-items" id="cartItems">
-                    <div class="cart-empty">
-                        <span style="font-size:2rem;">🛒</span>
-                        <span>Tap products to add</span>
-                    </div>
-                </div>
-                <div class="cart-footer" id="cartFooter" style="display:none;">
-                    <div class="discount-row">
-                        <select id="discountSelect" onchange="updateCart()">
-                            <option value="">No Discount</option>
-                            {% for d in discounts %}
-                            <option value="{{ d.id }}">{{ d.name }} ({% if d.kind == 'PERCENTAGE' %}{{ d.value }}%{% else %}₱{{ d.value }}{% endif %})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="row"><span>Subtotal</span><span id="subtotalDisplay">₱0.00</span></div>
-                    <div class="row discounted" id="discountDisplayRow" style="display:none;">
-                        <span>Discount</span><span id="discountDisplay">-₱0.00</span>
-                    </div>
-                    <div class="row total"><span>Total</span><span class="val" id="totalDisplay">₱0.00</span></div>
-                    <div class="pay-btns">
-                        <div class="pay-btn active" data-method="CASH" onclick="setPayment(this)"><span class="pay-icon">💵</span>CASH</div>
-                        <div class="pay-btn" data-method="GCASH" onclick="setPayment(this)"><span class="pay-icon">📱</span>GCASH</div>
-                        <div class="pay-btn" data-method="CARD" onclick="setPayment(this)"><span class="pay-icon">💳</span>CARD</div>
-                        <div class="pay-btn" data-method="MAYA" onclick="setPayment(this)"><span class="pay-icon">🏦</span>MAYA</div>
-                    </div>
-                    <button class="checkout-btn" id="checkoutBtn" onclick="checkout()">
-                        💳 Pay Now
-                    </button>
-                </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem;"><span>Subtotal</span><span id="subtotalDisplay">₱0.00</span></div>
+            <div class="discounted" id="discountDisplayRow" style="display:none;justify-content:space-between;font-size:0.85rem;">
+                <span>Discount</span><span id="discountDisplay">-₱0.00</span>
             </div>
+            <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;border-top:1px solid var(--border-light);padding-top:0.6rem;margin-top:0.2rem;"><span>Total</span><span id="totalDisplay" style="color:var(--primary);">₱0.00</span></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.5rem;">
+                <div class="pay-btn active" data-method="CASH" onclick="setPayment(this)" style="padding:0.55rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:#f8fafc;cursor:pointer;font-size:0.75rem;font-weight:600;text-align:center;"><span style="display:block;font-size:1.1rem;margin-bottom:0.15rem;">💵</span>CASH</div>
+                <div class="pay-btn" data-method="GCASH" onclick="setPayment(this)" style="padding:0.55rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:#f8fafc;cursor:pointer;font-size:0.75rem;font-weight:600;text-align:center;"><span style="display:block;font-size:1.1rem;margin-bottom:0.15rem;">📱</span>GCASH</div>
+                <div class="pay-btn" data-method="CARD" onclick="setPayment(this)" style="padding:0.55rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:#f8fafc;cursor:pointer;font-size:0.75rem;font-weight:600;text-align:center;"><span style="display:block;font-size:1.1rem;margin-bottom:0.15rem;">💳</span>CARD</div>
+                <div class="pay-btn" data-method="MAYA" onclick="setPayment(this)" style="padding:0.55rem;border-radius:var(--radius-sm);border:1px solid var(--border-light);background:#f8fafc;cursor:pointer;font-size:0.75rem;font-weight:600;text-align:center;"><span style="display:block;font-size:1.1rem;margin-bottom:0.15rem;">🏦</span>MAYA</div>
+            </div>
+            <button class="btn btn-primary" id="checkoutBtn" onclick="checkout()" style="width:100%;padding:0.75rem;font-size:1rem;margin-top:0.5rem;" disabled>
+                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </button>
         </div>
     </div>
 </div>
+
+<!-- Size Picker Modal -->
+<div class="modal-overlay" id="sizePickerModal" style="display:none;" onclick="if(event.target===this)closeSizePicker()">
+    <div class="modal-content" style="max-width:400px;">
+        <h3 style="text-align:center;" id="sizePickerTitle">Select Size</h3>
+        <div id="sizePickerGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:1rem;">
+        </div>
+        <button class="btn" onclick="closeSizePicker()" style="margin-top:0.75rem;width:100%;padding:0.6rem;background:var(--bg-input);color:var(--text);border:1px solid var(--border-light);">Cancel</button>
+    </div>
+</div>
+<style>
+.size-option { padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg-input);cursor:pointer;text-align:center;transition:all 0.15s; }
+.size-option:hover { border-color:var(--primary);background:rgba(13,148,136,0.05); }
+</style>
 
 <!-- Receipt Modal -->
 <div class="modal-overlay" id="receiptModal">
     <div class="modal-content">
-        <h2>✅ Payment Received</h2>
-        <hr class="receipt-divider">
-        <div class="receipt-txn-id">Transaction #<span id="receiptId"></span></div>
-        <hr class="receipt-divider">
+        <h3 style="text-align:center;">✅ Payment Received</h3>
+        <hr class="divider" style="border-color:var(--border-light);">
+        <div style="text-align:center;color:var(--text-muted-content);font-size:0.75rem;margin-bottom:0.75rem;">Transaction #<span id="receiptId"></span></div>
+        <hr class="divider" style="border-color:var(--border-light);">
         <div id="receiptLines"></div>
-        <hr class="receipt-divider">
-        <div id="receiptSubtotal" class="receipt-line"><span>Subtotal</span><span></span></div>
-        <div id="receiptDiscount" class="receipt-line" style="display:none;color:var(--warning);"><span>Discount</span><span></span></div>
-        <div id="receiptTotal" class="receipt-line total"><span>Total</span><span></span></div>
-        <div style="text-align:center;margin-top:0.75rem;color:var(--text-muted);font-size:0.75rem;">{{ items|length }} products · Ipo-Ipo POS</div>
-        <button class="ok-btn" onclick="closeReceipt()">✅ Done</button>
+        <hr class="divider" style="border-color:var(--border-light);">
+        <div id="receiptSubtotal" class="flex" style="justify-content:space-between;padding:0.3rem 0;font-size:0.85rem;"><span>Subtotal</span><span></span></div>
+        <div id="receiptDiscount" class="flex" style="display:none;justify-content:space-between;padding:0.3rem 0;font-size:0.85rem;color:var(--warning);"><span>Discount</span><span></span></div>
+        <div id="receiptTotal" class="flex" style="justify-content:space-between;padding:0.3rem 0;font-weight:700;border-top:1px dashed var(--border-light);padding-top:0.6rem;margin-top:0.4rem;font-size:1rem;"><span>Total</span><span></span></div>
+        <div style="text-align:center;margin-top:0.75rem;color:var(--text-muted-content);font-size:0.75rem;">{{ items|length }} products · CASSEY</div>
+        <button class="btn btn-primary" onclick="closeReceipt()" style="margin-top:1.25rem;width:100%;padding:0.75rem;font-size:1rem;">✅ Done</button>
+        <button class="btn" id="printReceiptBtn" onclick="printReceipt()" style="margin-top:0.4rem;width:100%;padding:0.75rem;background:var(--bg-input);color:var(--text);border:1px solid var(--border-light);">🖨️ Print Receipt</button>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/static/pos/js/dashboard-charts.js"></script>
+<style>
+    .product-tile:hover { border-color: var(--primary) !important; background: rgba(13,148,136,0.05) !important; transform: translateY(-1px); }
+    .product-tile:active { transform: translateY(0); }
+    .product-tile.out-of-stock { opacity: 0.4; cursor: not-allowed; }
+    .product-tile.out-of-stock:hover { border-color: var(--border-light) !important; background: var(--bg-input) !important; transform: none; }
+    .cat-btn.active { border-color: var(--primary) !important; background: rgba(13,148,136,0.1) !important; color: var(--primary) !important; font-weight: 600 !important; }
+    .cat-btn:hover { border-color: var(--primary-light) !important; }
+    .product-tile.hidden { display: none !important; }
+    .cart-item { display: flex; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; gap: 0.5rem; }
+    .cart-item:last-child { border-bottom: none; }
+    .cart-item .item-info { flex: 1; min-width: 0; }
+    .cart-item .item-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item .item-sub { font-size: 0.7rem; color: var(--text-muted-content); }
+    .cart-item .qty-ctrl { display: flex; align-items: center; gap: 0.3rem; }
+    .cart-item .qty-ctrl button { width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--border-light); background: #f8fafc; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; line-height: 1; color: var(--text-content); }
+    .cart-item .qty-ctrl button:hover { background: #e2e8f0; }
+    .cart-item .qty-ctrl span { font-size: 0.85rem; font-weight: 600; min-width: 20px; text-align: center; }
+    .cart-item .item-total { font-size: 0.85rem; font-weight: 600; color: var(--primary); min-width: 70px; text-align: right; }
+    .cart-item .remove-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; padding: 0.2rem; opacity: 0.6; }
+    .cart-item .remove-btn:hover { opacity: 1; }
+    .pay-btn.active { border-color: var(--primary) !important; background: rgba(13,148,136,0.08) !important; color: var(--primary) !important; font-weight: 700; }
+    .receipt-line { display: flex; justify-content: space-between; padding: 0.3rem 0; font-size: 0.85rem; }
+    .receipt-line.total { font-weight: 700; border-top: 1px dashed var(--border-light); padding-top: 0.6rem; margin-top: 0.4rem; font-size: 1rem; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+</style>
 <script>
-// ============ Cart State ============
 let cart = [];
 let selectedPayment = 'CASH';
 let salesUrl = '{{ sales_url }}';
+
+function filterCategory(btn, catId) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#productGrid .product-tile').forEach(tile => {
+        if (catId === 'all' || tile.dataset.category === catId) {
+            tile.classList.remove('hidden');
+        } else {
+            tile.classList.add('hidden');
+        }
+    });
+}
 
 function getDiscountValue() {
     const sel = document.getElementById('discountSelect');
@@ -402,94 +258,96 @@ function addToCart(el) {
     const price = parseFloat(el.dataset.price);
     const stock = parseInt(el.dataset.stock);
     const emoji = el.dataset.emoji;
-
+    const hasSizes = el.dataset.hasSizes === 'true';
+    
+    // If item has sizes, show size picker
+    if (hasSizes) {
+        let sizes = [];
+        try { sizes = JSON.parse(el.dataset.sizes); } catch(e) {}
+        if (sizes.length > 0) {
+            showSizePicker({ id, name, emoji, stock, sizes });
+            return;
+        }
+    }
+    
     const existing = cart.find(c => c.id === id);
     const currentQty = existing ? existing.qty : 0;
-
-    if (currentQty >= stock) {
-        alert('Not enough stock!');
-        return;
-    }
-
-    if (existing) {
-        existing.qty += 1;
-    } else {
-        cart.push({ id, name, price, qty: 1, emoji, stock });
-    }
+    if (currentQty >= stock) { alert('Not enough stock!'); return; }
+    if (existing) { existing.qty += 1; }
+    else { cart.push({ id, name, price, qty: 1, emoji, stock, size: null }); }
     renderCart();
 }
 
-function removeFromCart(id) {
-    cart = cart.filter(c => c.id !== id);
-    renderCart();
+function showSizePicker(item) {
+    const modal = document.getElementById('sizePickerModal');
+    const grid = document.getElementById('sizePickerGrid');
+    document.getElementById('sizePickerTitle').textContent = item.emoji + ' ' + item.name;
+    grid.innerHTML = '';
+    item.sizes.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'size-option';
+        btn.innerHTML = '<strong>' + s.name + '</strong><span style="color:var(--success);font-size:0.9rem;font-weight:700;">₱' + parseFloat(s.price).toFixed(2) + '</span>';
+        btn.onclick = function() {
+            const existing = cart.find(c => c.id === item.id && c.size === s.name);
+            const currentQty = existing ? existing.qty : 0;
+            if (currentQty >= item.stock) { alert('Not enough stock!'); return; }
+            if (existing) { existing.qty += 1; }
+            else { cart.push({ id: item.id, name: item.name + ' (' + s.name + ')', price: parseFloat(s.price), qty: 1, emoji: item.emoji, stock: item.stock, size: s.name }); }
+            renderCart();
+            closeSizePicker();
+        };
+        grid.appendChild(btn);
+    });
+    modal.style.display = 'flex';
 }
+
+function closeSizePicker() {
+    document.getElementById('sizePickerModal').style.display = 'none';
+}
+
+function removeFromCart(id) { cart = cart.filter(c => c.id !== id); renderCart(); }
 
 function changeQty(id, delta) {
     const item = cart.find(c => c.id === id);
     if (!item) return;
     const newQty = item.qty + delta;
-    if (newQty <= 0) {
-        removeFromCart(id);
-        return;
-    }
-    if (newQty > item.stock) {
-        alert('Not enough stock!');
-        return;
-    }
+    if (newQty <= 0) { removeFromCart(id); return; }
+    if (newQty > item.stock) { alert('Not enough stock!'); return; }
     item.qty = newQty;
     renderCart();
 }
 
-function clearCart() {
-    cart = [];
-    renderCart();
-}
+function clearCart() { cart = []; renderCart(); }
 
 function renderCart() {
     const container = document.getElementById('cartItems');
     const footer = document.getElementById('cartFooter');
     const clearBtn = document.getElementById('clearCartBtn');
     const checkoutBtn = document.getElementById('checkoutBtn');
-
     if (cart.length === 0) {
-        container.innerHTML = '<div class="cart-empty"><span style="font-size:2rem;">🛒</span><span>Tap products to add</span></div>';
+        container.innerHTML = '<div class="empty" style="padding:2rem;"><span class="icon" style="font-size:2rem;">🛒</span><p>Tap products to add</p></div>';
         footer.style.display = 'none';
         clearBtn.style.display = 'none';
+        checkoutBtn.disabled = true;
         return;
     }
-
     clearBtn.style.display = 'inline';
-    footer.style.display = 'flex';
-    footer.style.flexDirection = 'column';
-    footer.style.gap = '0.6rem';
-    checkoutBtn.disabled = false;
-
+    footer.style.display = 'block';
     let html = '';
-    cart.forEach(item => {
-        const lineTotal = (item.price * item.qty).toFixed(2);
-        html += '<div class="cart-item">';
-        html += '<div class="item-info">';
-        html += '<div class="item-name">' + item.emoji + ' ' + escapeHtml(item.name) + '</div>';
-        html += '<div class="item-sub">₱' + item.price.toFixed(2) + ' ea</div>';
-        html += '</div>';
-        html += '<div class="qty-ctrl">';
-        html += '<button onclick="changeQty(' + item.id + ',-1)">−</button>';
-        html += '<span>' + item.qty + '</span>';
-        html += '<button onclick="changeQty(' + item.id + ',1)">+</button>';
-        html += '</div>';
-        html += '<div class="item-total">₱' + lineTotal + '</div>';
-        html += '<button class="remove-btn" onclick="removeFromCart(' + item.id + ')">✕</button>';
-        html += '</div>';
+    cart.forEach(c => {
+        html += '<div class="cart-item"><div class="item-info"><div class="item-name">' + c.emoji + ' ' + c.name + '</div><div class="item-sub">₱' + c.price.toFixed(2) + ' ea</div></div>';
+        html += '<div class="qty-ctrl"><button onclick="changeQty(' + c.id + ',-1)">−</button><span>' + c.qty + '</span><button onclick="changeQty(' + c.id + ',1)">+</button></div>';
+        html += '<div class="item-total">₱' + (c.price * c.qty).toFixed(2) + '</div>';
+        html += '<button class="remove-btn" onclick="removeFromCart(' + c.id + ')">✕</button></div>';
     });
     container.innerHTML = html;
-    updateTotals();
+    updateCart();
+    checkoutBtn.disabled = false;
 }
 
-function updateTotals() {
+function updateCart() {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
     let discountAmount = 0;
-    let discountLabel = '';
-
     const discountId = getDiscountValue();
     if (discountId) {
         {% for d in discounts %}
@@ -499,30 +357,20 @@ function updateTotals() {
             {% else %}
             discountAmount = {{ d.value }};
             {% endif %}
-            discountLabel = '{{ d.name|escapejs }}';
         }
         {% endfor %}
     }
-
     const total = Math.max(0, subtotal - discountAmount);
-
     document.getElementById('subtotalDisplay').textContent = '₱' + subtotal.toFixed(2);
-
-    const discountRow = document.getElementById('discountDisplayRow');
-    const discountDisplay = document.getElementById('discountDisplay');
-    if (discountAmount > 0) {
-        discountRow.style.display = 'flex';
-        discountRow.style.justifyContent = 'space-between';
-        discountDisplay.textContent = '-₱' + discountAmount.toFixed(2) + ' (' + discountLabel + ')';
-    } else {
-        discountRow.style.display = 'none';
-    }
-
     document.getElementById('totalDisplay').textContent = '₱' + total.toFixed(2);
-}
-
-function updateCart() {
-    renderCart();
+    const dr = document.getElementById('discountDisplayRow');
+    const dd = document.getElementById('discountDisplay');
+    if (discountAmount > 0) {
+        dr.style.display = 'flex';
+        dd.textContent = '-₱' + discountAmount.toFixed(2);
+    } else {
+        dr.style.display = 'none';
+    }
 }
 
 function setPayment(el) {
@@ -533,10 +381,9 @@ function setPayment(el) {
 
 async function checkout() {
     if (cart.length === 0) return;
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    checkoutBtn.disabled = true;
-    checkoutBtn.textContent = '⏳ Processing...';
-
+    const btn = document.getElementById('checkoutBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" class="spin" style="width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32"/></svg> Processing...';
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
     let discountAmount = 0;
     const discountId = getDiscountValue();
@@ -551,93 +398,45 @@ async function checkout() {
         }
         {% endfor %}
     }
-
     try {
-        const cartPayload = cart.map(c => ({ item_id: c.id, quantity: c.qty }));
-
-        const body = {
-            cart: cartPayload,
-            payment_method: selectedPayment,
-            discount_id: discountId || undefined,
-        };
-
-        if (selectedPayment === 'GCASH' || selectedPayment === 'MAYA') {
-            body.reference_number = 'POS-' + Date.now();
-        }
-
-        const resp = await fetch('{% url "checkout_api" %}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
+        const body = { cart: cart.map(c => ({ item_id: c.id, quantity: c.qty })), payment_method: selectedPayment };
+        if (discountId) body.discount_id = discountId;
+        if (selectedPayment === 'GCASH' || selectedPayment === 'MAYA') body.reference_number = 'POS-' + Date.now();
+        const resp = await fetch('{% url "checkout_api" %}', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         const data = await resp.json();
-
         if (data.status === 'success') {
             showReceipt(data.transaction_id, cart, discountAmount);
-            cart = [];
-            renderCart();
-        } else {
-            alert('Error: ' + (data.message || 'Checkout failed'));
-        }
-    } catch (err) {
-        alert('Network error: ' + err.message);
-    } finally {
-        checkoutBtn.disabled = false;
-        checkoutBtn.textContent = '💳 Pay Now';
-    }
+            cart = []; renderCart();
+        } else { alert('Error: ' + (data.message || 'Checkout failed')); }
+    } catch (err) { alert('Network error: ' + err.message); }
+    finally { btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Pay Now'; }
 }
 
 function showReceipt(txnId, items, discountAmount) {
     document.getElementById('receiptId').textContent = txnId;
-
-    if (discountAmount > 0) {
-        document.getElementById('receiptDiscount').style.display = 'flex';
-        document.getElementById('receiptDiscount').style.justifyContent = 'space-between';
-        document.querySelector('#receiptDiscount span:last-child').textContent = '-₱' + discountAmount.toFixed(2);
-    } else {
-        document.getElementById('receiptDiscount').style.display = 'none';
-    }
-
+    document.getElementById('printReceiptBtn').dataset.txnId = txnId;
+    const dr = document.getElementById('receiptDiscount');
+    if (discountAmount > 0) { dr.style.display = 'flex'; dr.querySelector('span:last-child').textContent = '-₱' + discountAmount.toFixed(2); }
+    else { dr.style.display = 'none'; }
     const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
     const total = Math.max(0, subtotal - discountAmount);
-
     document.querySelector('#receiptSubtotal span:last-child').textContent = '₱' + subtotal.toFixed(2);
     document.querySelector('#receiptTotal span:last-child').textContent = '₱' + total.toFixed(2);
-
     let linesHtml = '';
-    items.forEach(item => {
-        linesHtml += '<div class="receipt-line"><span>' + item.emoji + ' ' + escapeHtml(item.name) + ' ×' + item.qty + '</span><span>₱' + (item.price * item.qty).toFixed(2) + '</span></div>';
-    });
+    items.forEach(item => { linesHtml += '<div class="receipt-line"><span>' + item.emoji + ' ' + item.name + ' ×' + item.qty + '</span><span>₱' + (item.price * item.qty).toFixed(2) + '</span></div>'; });
     document.getElementById('receiptLines').innerHTML = linesHtml;
-
     document.getElementById('receiptModal').classList.add('show');
 }
 
-function closeReceipt() {
-    document.getElementById('receiptModal').classList.remove('show');
+function closeReceipt() { document.getElementById('receiptModal').classList.remove('show'); }
+function printReceipt() {
+    const txnId = document.getElementById('printReceiptBtn').dataset.txnId;
+    if (txnId) window.open('/receipt/' + txnId + '/print/', '_blank', 'width=400,height=700');
 }
 
-function escapeHtml(text) {
-    const d = document.createElement('div');
-    d.textContent = text;
-    return d.innerHTML;
-}
+(function() { const now = new Date(); document.getElementById('currentDate').textContent = now.toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }); })();
+document.addEventListener('DOMContentLoaded', initCharts);
 
-// Date display
-(function() {
-    const now = new Date();
-    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-PH', opts);
-})();
-
-// Live search (client-side filter)
-document.getElementById('searchInput')?.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('searchForm').submit();
-    }
-});
+document.getElementById('searchInput')?.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('searchForm').submit(); } });
 </script>
-</body>
-</html>
+{% endblock %}

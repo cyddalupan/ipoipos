@@ -1,0 +1,107 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" type="image/png" href="{% static 'pos/favicon.svg' %}">
+    <meta charset="utf-8">
+    <title>KOT #{{ transaction.id }}</title>
+    <style>
+        @page { size: 80mm auto; margin: 0; }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            width: 72mm;
+            margin: 0 auto;
+            padding: 4mm;
+        }
+        h1 {
+            font-size: 16px;
+            text-align: center;
+            margin: 0 0 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 4px;
+        }
+        .table-no {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 4px 0;
+        }
+        .order-type {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 2px 0;
+        }
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            border-bottom: 1px solid #000;
+            padding: 2px 0;
+        }
+        td {
+            padding: 2px 0;
+        }
+        .qty { text-align: center; width: 30px; }
+        .item-name { padding-left: 4px; }
+        .footer {
+            text-align: center;
+            margin-top: 8px;
+            border-top: 1px dashed #000;
+            padding-top: 4px;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Kitchen Order Ticket</h1>
+        <div>Order #{{ transaction.id }}</div>
+        <div>{{ transaction.timestamp|date:"m/d/Y h:i A" }}</div>
+    </div>
+
+    {% if transaction.order_type == "DINE_IN" %}
+        <div class="table-no">Table {{ transaction.table_number }}</div>
+    {% endif %}
+
+    <div class="order-type">
+        {{ transaction.get_order_type_display }}
+    </div>
+
+    <div class="divider"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="qty">Qty</th>
+                <th class="item-name">Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td class="qty">x{{ item.quantity }}</td>
+                <td class="item-name">{{ item.item.name }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>*** Food Preparation Copy ***</p>
+    </div>
+</body>
+</html>

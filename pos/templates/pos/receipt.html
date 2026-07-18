@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" type="image/png" href="{% static 'pos/favicon.svg' %}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ipo-Ipo POS — Receipt #{{ transaction.id }}</title>
+    <title>CASSEY — Receipt #{{ transaction.id }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -37,7 +39,7 @@
 <body>
     <div class="receipt">
         <div class="receipt-header">
-            <h1>🏪 Ipo-Ipo POS</h1>
+            <h1>CASSEY</h1>
             <p>Receipt #TXN-{{ transaction.id }}</p>
             <p>{{ transaction.timestamp|date:"M d, Y H:i" }}</p>
         </div>

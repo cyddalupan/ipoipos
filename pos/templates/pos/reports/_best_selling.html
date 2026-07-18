@@ -1,0 +1,31 @@
+{% if report_data.items %}
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Item</th>
+                <th>Category</th>
+                <th class="text-right">Qty Sold</th>
+                <th class="text-right">Total Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for it in report_data.items %}
+            <tr>
+                <td class="fw-bold">#{{ it.rank }}</td>
+                <td>
+                    {% if it.emoji %}{{ it.emoji }} {% endif %}{{ it.name }}
+                </td>
+                <td class="text-muted">{{ it.category }}</td>
+                <td class="text-right fw-bold">{{ it.qty }}</td>
+                <td class="text-right text-success mono">₱{{ it.sales|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="icon">🏆</div>
+        <p>No sales data for this period.</p>
+    </div>
+{% endif %}

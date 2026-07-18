@@ -1,0 +1,154 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="{% static 'pos/favicon.svg' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width:58mm">
+    <title>Receipt #{{ transaction.id }}</title>
+    <style>
+        /* Thermal receipt paper styles — works with 80mm and 58mm */
+        @page {
+            margin: 0;
+            size: 80mm auto;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', 'Courier', monospace;
+            font-size: 10px;
+            line-height: 1.3;
+            width: 72mm;
+            padding: 2mm 4mm;
+            color: #000;
+            background: #fff;
+        }
+        {% if transaction.status == "VOIDED" %}
+        .void-overlay {
+            position: relative;
+            overflow: hidden;
+        }
+        .void-overlay::before {
+            content: "VOID";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 48px;
+            font-weight: bold;
+            color: rgba(239, 68, 68, 0.25);
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10;
+            letter-spacing: 8px;
+        }
+        .void-badge {
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #ef4444;
+            margin: 4px 0;
+            padding: 2px;
+            border: 2px solid #ef4444;
+        }
+        {% endif %}
+        .header { text-align: center; margin-bottom: 4px; }
+        .header h1 { font-size: 14px; font-weight: bold; }
+        .header .sub { font-size: 9px; color: #555; }
+        .divider { border: none; border-top: 1px dashed #000; margin: 4px 0; }
+        .row { display: flex; justify-content: space-between; font-size: 10px; }
+        .row .left { text-align: left; }
+        .row .right { text-align: right; white-space: nowrap; }
+        .item { display: flex; justify-content: space-between; font-size: 10px; }
+        .item .name { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item .qty { text-align: center; width: 24px; }
+        .item .price { text-align: right; white-space: nowrap; }
+        .total-row { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; }
+        .grand-total { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; border-top: 1px dashed #000; padding-top: 4px; margin-top: 4px; }
+        .footer { text-align: center; font-size: 9px; color: #555; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #000; }
+        .info { font-size: 9px; margin-bottom: 2px; }
+        .info span { color: #555; }
+        @media print {
+            body { width: 72mm; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="{% if transaction.status == 'VOIDED' %}void-overlay{% endif %}">
+    {% if transaction.status == "VOIDED" %}
+    <div class="void-badge">⛔ THIS RECEIPT IS VOIDED ⛔</div>
+        <div class="info" style="text-align:center;color:#ef4444;font-size:9px;margin-bottom:4px">
+            {% if transaction.void_reason %}<div><span>Reason:</span> {{ transaction.void_reason }}</div>{% endif %}
+            {% if transaction.voided_at %}<div><span>Voided at:</span> {{ transaction.voided_at|date:"M d, Y H:i" }}</div>{% endif %}
+        </div>
+    {% endif %}
+
+    <div class="header">
+        <h1>CASSEY</h1>
+        <div class="sub">Receipt #TXN-{{ transaction.id }}</div>
+        <div class="sub">{{ transaction.timestamp|date:"M d, Y H:i" }}</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="info">
+        {% if transaction.table_number %}
+            <div><span>Table:</span> {{ transaction.table_number }}</div>
+        {% endif %}
+        <div><span>Order:</span> {{ transaction.get_order_type_display }}</div>
+        <div><span>Payment:</span> {{ transaction.get_payment_method_display }}</div>
+    </div>
+
+    <hr class="divider">
+
+    {% for line_item in transaction.line_items.all %}
+    <div class="item">
+        <span class="name">{{ line_item.item.emoji|default:"📦" }} {{ line_item.item.name }}</span>
+        <span class="qty">x{{ line_item.quantity }}</span>
+        <span class="price">₱{{ line_item.total_price|floatformat:2 }}</span>
+    </div>
+    {% endfor %}
+
+    <hr class="divider">
+
+    <div class="total-row">
+        <span>Subtotal</span>
+        <span>₱{{ transaction.subtotal|floatformat:2 }}</span>
+    </div>
+
+    {% if transaction.discount_amount > 0 %}
+    <div class="total-row" style="color:#555;">
+        <span>Discount</span>
+        <span>-₱{{ transaction.discount_amount|floatformat:2 }}</span>
+    </div>
+    {% endif %}
+
+    {% if transaction.vat_amount > 0 %}
+    <div class="total-row" style="color:#555;">
+        <span>VAT (12%)</span>
+        <span>₱{{ transaction.vat_amount|floatformat:2 }}</span>
+    </div>
+    {% endif %}
+
+    <div class="grand-total">
+        <span>Total</span>
+        <span>₱{{ transaction.grand_total|floatformat:2 }}</span>
+    </div>
+
+    {% if transaction.manual_discount_pct %}
+    <div class="info" style="margin-top:4px;">
+        <div><span>Manual Discount:</span> {{ transaction.manual_discount_pct }}%</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <div>Thank you for dining with us!</div>
+        <div style="margin-top:2px;font-size:8px;">CASSEY v1.0</div>
+        <div class="no-print" style="margin-top:4px;">
+            <button onclick="window.print()" style="padding:4px 12px;font-size:10px;cursor:pointer;">🖨️ Print</button>
+            <button onclick="window.close()" style="padding:4px 12px;font-size:10px;cursor:pointer;">✕ Close</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

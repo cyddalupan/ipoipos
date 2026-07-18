@@ -1,0 +1,133 @@
+--- a/pos/views.py
++++ b/pos/views.py
+@@ -1,23 +1,11 @@
+-"""Views for Ipo-Ipo POS."""
++"""Views for Ipo-iPOS — no authentication, offline-first POS."""
+ 
+ import json
+ from decimal import Decimal
+ from django.db import models as dj_models
+ from django.utils import timezone
+-from django.contrib.auth.decorators import login_required
+-from django.contrib.auth.mixins import LoginRequiredMixin
+-from django.contrib.auth.views import LoginView
+ from django.shortcuts import render, redirect, get_object_or_404
+ from django.http import JsonResponse
+ from django.views.decorators.csrf import csrf_exempt
+ from django.views.decorators.http import require_http_methods
+ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
+ from django.urls import reverse_lazy
+-from django.contrib.auth import logout as auth_logout
+ from .models import Item, Category, Transaction, TransactionItem, DiscountType, MealSubcategory, Shift, CashCount, Expense, Staff
+ from .services import CheckoutEngine
+-
+-
+-class CustomLoginView(LoginView):
+-    """Login view that redirects already-authenticated users to home."""
+-    template_name = "registration/login.html"
+-
+-    def get(self, request, *args, **kwargs):
+-        if request.user.is_authenticated:
+-            next_url = request.GET.get("next", "/")
+-            return redirect(next_url)
+-        return super().get(request, *args, **kwargs)
+-
+-
+-def custom_logout(request):
+-    """Custom logout view that accepts GET and POST."""
+-    auth_logout(request)
+-    return redirect("login")
+@@ -34,7 +22,6 @@ def home(request):
+     return render(request, "pos/home.html", context)
+ 
+ 
+-class InventoryDashboardView(LoginRequiredMixin, ListView):
++class InventoryDashboardView(ListView):
+     model = Item
+     template_name = "inventory/dashboard.html"
+     context_object_name = "inventory_items"
+@@ -47,7 +34,7 @@ class InventoryDashboardView(LoginRequiredMixin, ListView):
+         return ctx
+ 
+ 
+-class ItemCreateView(LoginRequiredMixin, CreateView):
++class ItemCreateView(CreateView):
+     model = Item
+     fields = [
+         "category", "name", "sku", "emoji", "image",
+@@ -60,7 +47,7 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
+         return ctx
+ 
+ 
+-class ItemUpdateView(LoginRequiredMixin, UpdateView):
++class ItemUpdateView(UpdateView):
+     model = Item
+     fields = [
+         "category", "name", "sku", "emoji", "image",
+@@ -73,7 +60,6 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
+         return ctx
+ 
+ 
+-@login_required
+ def sales_history(request):
+     """List of completed transactions only."""
+     transactions = Transaction.objects.filter(status="COMPLETED").order_by("-timestamp")[:100]
+@@ -83,7 +69,6 @@ def sales_history(request):
+     })
+ 
+ 
+-@login_required
+ def reports(request):
+     """Reports dashboard with type selector, date range filter, and CSV export."""
+     from .reports_engine import REPORT_OPTIONS
+@@ -154,7 +139,6 @@ def reports(request):
+     return render(request, "pos/reports.html", context)
+ 
+ 
+-@login_required
+ def customers(request):
+     """Customers page (placeholder — no login/auth)."""
+     return render(request, "pos/customers.html", {
+@@ -162,7 +146,6 @@ def customers(request):
+     })
+ 
+ 
+-@login_required
+ def product_catalog(request):
+     """Full product catalog view with optional subcategory filter."""
+     items = Item.objects.filter(is_active=True).select_related("category", "meal_subcategory").order_by("category__name", "name")
+@@ -240,7 +223,7 @@ def shift_start_api(request):
+     if request.method != "POST":
+         return JsonResponse({"error": "Method not allowed"}, status=405)
+ 
+-    # Check if user already has an open shift
++    # Check if there's already an open shift
+     if Shift.objects.filter(cashier=request.user, status=Shift.Status.OPEN).exists():
+         return JsonResponse({"error": "An open shift already exists"}, status=409)
+ 
+@@ -250,7 +233,7 @@ def shift_start_api(request):
+     except (json.JSONDecodeError, ValueError):
+         return JsonResponse({"error": "Invalid JSON or float value"}, status=400)
+ 
+-    shift = Shift.objects.create(
++    shift = Shift.objects.create (noqa: E251
+         cashier=request.user,
+         starting_float=starting_float,
+     )
+@@ -333,7 +316,7 @@ def shift_current_api(request):
+     "Get the current open shift for the logged-in user."
+     shift = Shift.objects.filter(cashier=request.user, status=Shift.Status.OPEN).first()
+     if not shift:
+         return JsonResponse({}, status=204)
+ 
+     return JsonResponse({
+         "id": shift.id,
+         "cashier": shift.cashier.username,
+         "start_time": shift.start_time.isoformat(),
+         "end_time": None,
+         "starting_float": str(shift.starting_float),
+         "ending_float": None,
+         "status": shift.status,
+     })
+@@ -348,7 +331,6 @@ def shift_current_api(request):
+ You'll need to properly edit views.py differently. The patching approach won't work well for the full file. Let me take a different approach.

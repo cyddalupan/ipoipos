@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="{% static 'pos/favicon.svg' %}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width:80mm">
+    <title>Shift Report #{{ shift.id }}</title>
+    <style>
+        @page { margin: 0; size: 80mm auto; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', 'Courier', monospace;
+            font-size: 10px;
+            line-height: 1.4;
+            width: 72mm;
+            padding: 2mm 4mm;
+            color: #000;
+            background: #fff;
+        }
+        .header { text-align: center; margin-bottom: 6px; }
+        .header h1 { font-size: 16px; font-weight: bold; }
+        .header h2 { font-size: 14px; margin-top: 2px; }
+        .header .sub { font-size: 9px; color: #555; }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 3px;
+            margin: 4px 0;
+        }
+        .badge-open { background: #dbeafe; color: #1e40af; }
+        .badge-closed { background: #dcfce7; color: #166534; }
+        .divider { border: none; border-top: 1px dashed #000; margin: 4px 0; }
+        .divider-thick { border: none; border-top: 2px solid #000; margin: 4px 0; }
+        .row { display: flex; justify-content: space-between; font-size: 10px; }
+        .section-title { font-size: 11px; font-weight: bold; margin: 6px 0 2px; }
+        table { width: 100%; font-size: 10px; border-collapse: collapse; }
+        th { text-align: left; border-bottom: 1px solid #000; padding: 2px 0; }
+        td { padding: 1px 0; }
+        td.right, th.right { text-align: right; }
+        td.center, th.center { text-align: center; }
+        .grand-row { font-size: 12px; font-weight: bold; }
+        .variance-positive { color: #16a34a; }
+        .variance-negative { color: #dc2626; }
+        .footer { text-align: center; font-size: 9px; color: #555; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #000; }
+        .info-note { font-size: 8px; color: #888; margin-top: 2px; }
+        @media print {
+            body { width: 72mm; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>CASSEY</h1>
+        <h2>
+            {% if report_type == "xread" %}X-Read Report{% endif %}
+            {% if report_type == "zread" %}📋 Z-Read Report{% endif %}
+        </h2>
+        <div class="sub">Shift #{{ report.shift_id }}</div>
+        <div class="badge {% if report.status == 'OPEN' %}badge-open{% else %}badge-closed{% endif %}">
+            {{ report.status }}
+        </div>
+        <div class="sub">Cashier: {{ shift.cashier.get_full_name|default:shift.cashier.username }}</div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="section-title">⏱ Shift Times</div>
+    <div class="row"><span>Start:</span><span>{{ report.start_time }}</span></div>
+    {% if report.end_time %}
+    <div class="row"><span>End:</span><span>{{ report.end_time }}</span></div>
+    {% endif %}
+
+    <hr class="divider">
+
+    <div class="section-title">💰 Sales Summary</div>
+    <div class="row"><span>Starting Float:</span><span>₱{{ report.starting_float }}</span></div>
+    <div class="row"><span>Total Sales:</span><span>₱{{ report.total_sales }}</span></div>
+    <div class="row"><span>Total Expenses:</span><span>₱{{ report.total_expenses }}</span></div>
+    <div class="grand-row row" style="margin-top:2px;"><span>Net Sales:</span><span>₱{{ report.net_sales }}</span></div>
+
+    <hr class="divider">
+
+    <div class="section-title">💳 Payment Breakdown</div>
+    <table>
+        <tr><th>Method</th><th class="center">Count</th><th class="right">Total</th></tr>
+        {% for pmt in report.payment_breakdown %}
+        <tr>
+            <td>{{ pmt.method }}</td>
+            <td class="center">{{ pmt.count }}</td>
+            <td class="right">₱{{ pmt.total }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="text-align:center;color:#888;">No transactions</td></tr>
+        {% endfor %}
+    </table>
+
+    <hr class="divider">
+
+    <div class="section-title">📝 Expenses</div>
+    <table>
+        <tr><th>Description</th><th class="right">Amount</th></tr>
+        {% for exp in report.expenses %}
+        <tr>
+            <td>{{ exp.description|truncatechars:25 }}{% if exp.category %} ({{ exp.category }}){% endif %}</td>
+            <td class="right">-₱{{ exp.amount }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="2" style="text-align:center;color:#888;">No expenses</td></tr>
+        {% endfor %}
+    </table>
+
+    <hr class="divider">
+
+    <div class="section-title">🔢 Cash Count</div>
+    <div class="row"><span>Counted:</span><span>₱{{ report.total_counted }}</span></div>
+    <div class="row"><span>Expected:</span><span>₱{{ report.expected_cash }}</span></div>
+    <div class="grand-row row">
+        <span>Variance:</span>
+        <span class="{% if report.variance|floatformat:2|first == '-' %}variance-negative{% else %}variance-positive{% endif %}">
+            ₱{{ report.variance }}
+        </span>
+    </div>
+
+    {% if report.status == "CLOSED" %}
+    <hr class="divider-thick">
+    <div class="header" style="margin-top:2px;">
+        <div style="font-size:14px;font-weight:bold;">✅ SHIFT CLOSED</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <div>CASSEY — End-of-Shift Report</div>
+        <div style="margin-top:2px;font-size:8px;">Generated: {{ generated_at }}</div>
+        <div class="no-print" style="margin-top:4px;">
+            <button onclick="window.print()" style="padding:4px 12px;font-size:10px;cursor:pointer;">🖨️ Print</button>
+            <button onclick="window.close()" style="padding:4px 12px;font-size:10px;cursor:pointer;">✕ Close</button>
+        </div>
+    </div>
+</body>
+</html>

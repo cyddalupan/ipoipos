@@ -1,0 +1,47 @@
+{% if report_data.shifts %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cashier</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+                <th class="text-right">Txns</th>
+                <th class="text-right">Sales</th>
+                <th class="text-right">Expenses</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in report_data.shifts %}
+            <tr>
+                <td class="mono">#{{ s.id }}</td>
+                <td>{{ s.cashier }}</td>
+                <td class="mono">{{ s.start }}</td>
+                <td class="mono">{{ s.end }}</td>
+                <td>
+                    {% if s.status == "OPEN" %}
+                        <span style="color:var(--success)">● Open</span>
+                    {% else %}
+                        <span class="text-muted">● Closed</span>
+                    {% endif %}
+                </td>
+                <td class="text-right">{{ s.txn_count }}</td>
+                <td class="text-right text-success mono">₱{{ s.sales|floatformat:2 }}</td>
+                <td class="text-right text-warning mono">₱{{ s.expenses|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="grand-total">
+                <td colspan="5" class="fw-bold">TOTAL</td>
+                <td class="text-right fw-bold"></td>
+                <td class="text-right text-success fw-bold mono">₱{{ report_data.total_sales|floatformat:2 }}</td>
+                <td></td>
+            </tr>
+        </tbody>
+    </table>
+{% else %}
+    <div class="empty-state">
+        <div class="icon">🔄</div>
+        <p>No shifts found for this period.</p>
+    </div>
+{% endif %}

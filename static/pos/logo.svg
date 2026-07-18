@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d9488;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#0f766e;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="tornadoTop" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#ccfbf1;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Circle icon background -->
+  <rect x="20" y="20" width="280" height="280" rx="60" fill="url(#bg)"/>
+
+  <!-- Tornado icon -->
+  <g transform="translate(160, 160)" fill="none" stroke="url(#tornadoTop)" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- Main swirl - funnel top -->
+    <path d="M0,-90 Q60,-85 70,-60 Q80,-35 30,-30" stroke-width="10" fill="url(#tornadoTop)" opacity="0.9"/>
+
+    <!-- Second tier -->
+    <path d="M30,-30 Q-40,-25 -50,0 Q-60,25 -10,25" stroke-width="9" fill="url(#tornadoTop)" opacity="0.8"/>
+
+    <!-- Third tier -->
+    <path d="M-10,25 Q50,28 60,50 Q70,72 20,75" stroke-width="8" fill="url(#tornadoTop)" opacity="0.7"/>
+
+    <!-- Bottom wisp -->
+    <path d="M20,75 Q-25,78 -30,95 Q-35,112 -5,115" stroke-width="6" fill="url(#tornadoTop)" opacity="0.5"/>
+
+    <!-- Dust trail -->
+    <path d="M-5,115 Q15,115 20,125" stroke-width="4" fill="none" stroke-opacity="0.4"/>
+    <path d="M-5,115 Q-25,120 -20,128" stroke-width="3" fill="none" stroke-opacity="0.3"/>
+
+    <!-- Speed lines -->
+    <path d="M65,-70 Q75,-60 70,-50" stroke-width="3" fill="none" stroke-opacity="0.6"/>
+    <path d="M-65,5 Q-75,15 -65,20" stroke-width="3" fill="none" stroke-opacity="0.5"/>
+    <path d="M65,55 Q75,60 70,68" stroke-width="2" fill="none" stroke-opacity="0.4"/>
+
+    <!-- Small debris dots -->
+    <circle cx="75" cy="-70" r="3" fill="url(#tornadoTop)" opacity="0.7"/>
+    <circle cx="-70" cy="10" r="2" fill="url(#tornadoTop)" opacity="0.6"/>
+    <circle cx="75" cy="60" r="2.5" fill="url(#tornadoTop)" opacity="0.5"/>
+    <circle cx="-50" cy="90" r="2" fill="url(#tornadoTop)" opacity="0.4"/>
+    <circle cx="40" cy="105" r="1.5" fill="url(#tornadoTop)" opacity="0.3"/>
+  </g>
+
+  <!-- Text "Ipo-iPOS" -->
+  <g transform="translate(160, 380)">
+    <text x="0" y="0" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="60" font-weight="700" fill="#0d9488" letter-spacing="1">Ipo-iPOS</text>
+    <text x="0" y="32" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="400" fill="#64748b" letter-spacing="3">POINT OF SALE</text>
+  </g>
+
+  <!-- Small tornado emoji-like mark in corner -->
+  <text x="380" y="60" font-size="60" fill="#0d9488" opacity="0.3">🌪️</text>
+</svg>
