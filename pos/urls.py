@@ -59,4 +59,8 @@ urlpatterns = [
     path("api/shifts/<int:shift_id>/report/print/", views.shift_report_print, name="shift_report_print"),
     # Dashboard Charts
     path("api/dashboard/chart-data/", views.dashboard_chart_data_api, name="dashboard_chart_data_api"),
+
+    # Borrower (Phase 5: Product Lend)
+    path("borrowers/", views.borrower_list, name="borrower_list"),
+    path("borrowers/add/", views.borrower_add, name="borrower_add"),
 ]

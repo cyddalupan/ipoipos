@@ -1,0 +1,74 @@
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — Borrowers{% endblock %}
+
+{% block breadcrumb %}
+<h2>Product Lend (Borrowers)</h2>
+{% url 'home' as crumb_home_url %}<div class="breadcrumb"><a href="{{ crumb_home_url }}">Dashboard</a><span class="sep">/</span><span>Borrowers</span></div>
+{% endblock %}
+
+{% block topbar_right %}
+<div class="topbar-right">
+    {% if current_branch %}
+    <span style="font-size:0.75rem;color:var(--text-muted-content);margin-right:0.5rem;display:inline-flex;align-items:center;gap:0.3rem;">
+        <span>{% if current_branch.type == "LPG" %}🔥{% elif current_branch.type == "AGRI" %}🌾{% elif current_branch.type == "RETAIL" %}🛒{% elif current_branch.type == "WHOLESALE" %}📦{% else %}🏪{% endif %}</span>
+        {{ current_branch.name }}
+    </span>
+    <a href="{% url 'branch_select' %}" style="font-size:0.75rem;color:var(--primary);text-decoration:none;margin-right:0.75rem;">🔄 Change</a>
+    {% endif %}
+    <a href="{% url 'borrower_add' %}" class="btn btn-sm btn-primary" style="font-size:0.8rem;padding:0.4rem 0.75rem;">➕ New Borrower</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>📋 Borrower Records</h3>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Size</th>
+                <th>Qty</th>
+                <th>Date Borrowed</th>
+                <th>Return Date</th>
+                <th>Contact</th>
+                <th>Receipt</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for b in borrowers %}
+            <tr>
+                <td><strong>{{ b.name }}</strong></td>
+                <td>{% if b.product %}{{ b.product.emoji|default:"📦" }} {{ b.product.name }}{% else %}—{% endif %}</td>
+                <td>₱{{ b.price|floatformat:2 }}</td>
+                <td>{{ b.size|default:"—" }}</td>
+                <td>{{ b.qty }}</td>
+                <td>{{ b.date_borrowed|date:"M d, Y" }}</td>
+                <td>{% if b.return_date %}{{ b.return_date|date:"M d, Y" }}{% else %}<span style="color:var(--warning);">Pending</span>{% endif %}</td>
+                <td>{{ b.contact }}</td>
+                <td>
+                    {% if b.receipt %}
+                    <a href="{{ b.receipt.url }}" target="_blank" class="action-link">🖼️ View</a>
+                    {% else %}
+                    <span style="color:var(--text-muted-content);">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="empty" style="text-align:center;padding:2rem;">
+                    <span class="icon" style="font-size:2rem;">📋</span>
+                    <p>No borrower records yet.</p>
+                    <a href="{% url 'borrower_add' %}" class="btn btn-primary" style="margin-top:0.5rem;">➕ Add Borrower</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

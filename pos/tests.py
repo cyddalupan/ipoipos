@@ -3815,3 +3815,230 @@ class POSPageTest(TestCase):
         self.assertNotIn("Today's Sales", content)
         self.assertNotIn("Low Stock", content)
         self.assertNotIn("chart-sales-trend", content)
+
+
+class BorrowerModelTest(TestCase):
+    """Tests for Borrower model (Phase 5: Product Lend)."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="user", password="***")
+        self.client.force_login(self.user)
+        self.cat = Category.objects.create(name="Test")
+        self.branch = Branch.objects.create(name="Main", code="BR-01", type="RETAIL")
+        self.item = Item.objects.create(
+            category=self.cat, name="Coke", sku="DRK-001",
+            cost_price="10", selling_price="25", stock_qty=100,
+            branch=self.branch
+        )
+
+    def test_borrower_model_exists(self):
+        """Borrower model should be importable."""
+        from pos.models import Borrower
+        self.assertTrue(hasattr(Borrower, '_meta'))
+
+    def test_borrower_has_name_field(self):
+        """Borrower should have a name field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('name')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_product_field(self):
+        """Borrower should have a product (FK to Item) field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('product')
+        self.assertEqual(field.related_model.__name__, 'Item')
+
+    def test_borrower_has_price_field(self):
+        """Borrower should have a price field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('price')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_size_field(self):
+        """Borrower should have an optional size field (FK or CharField)."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('size')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_qty_field(self):
+        """Borrower should have a quantity field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('qty')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_date_borrowed_field(self):
+        """Borrower should have a date_borrowed field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('date_borrowed')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_return_date_field(self):
+        """Borrower should have a return_date field (nullable)."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('return_date')
+        self.assertTrue(field.null)
+
+    def test_borrower_has_contact_field(self):
+        """Borrower should have a contact number field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('contact')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_address_field(self):
+        """Borrower should have an address field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('address')
+        self.assertIsNotNone(field)
+
+    def test_borrower_has_receipt_field(self):
+        """Borrower should have a receipt image upload field."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('receipt')
+        self.assertIsNotNone(field)
+        # Should be an ImageField or FileField
+        self.assertIn(field.get_internal_type(), ['ImageField', 'FileField'])
+
+    def test_borrower_has_branch_field(self):
+        """Borrower should have a branch FK."""
+        from pos.models import Borrower
+        field = Borrower._meta.get_field('branch')
+        self.assertEqual(field.related_model.__name__, 'Branch')
+
+    def test_borrower_can_be_created(self):
+        """A Borrower record can be created and retrieved."""
+        from pos.models import Borrower
+        from django.utils import timezone
+        b = Borrower.objects.create(
+            name="Juan Dela Cruz",
+            product=self.item,
+            price="25.00",
+            size="1L",
+            qty=2,
+            date_borrowed=timezone.now().date(),
+            contact="09171234567",
+            address="123 Rizal St, Manila",
+            branch=self.branch
+        )
+        self.assertEqual(Borrower.objects.count(), 1)
+        self.assertEqual(b.name, "Juan Dela Cruz")
+        self.assertEqual(b.product.name, "Coke")
+        self.assertEqual(b.qty, 2)
+
+    def test_borrower_str_method(self):
+        """Borrower __str__ should return the name."""
+        from pos.models import Borrower
+        from django.utils import timezone
+        b = Borrower.objects.create(
+            name="Maria",
+            product=self.item,
+            price="25.00",
+            qty=1,
+            date_borrowed=timezone.now().date(),
+            contact="09170000000",
+            address="Quezon City",
+            branch=self.branch
+        )
+        self.assertEqual(str(b), "Maria")
+
+
+class BorrowerViewTest(TestCase):
+    """Tests for Borrower views/URLs (Phase 5: Product Lend)."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="user", password="***")
+        self.client.force_login(self.user)
+        self.cat = Category.objects.create(name="Test")
+        self.branch = Branch.objects.create(name="Main", code="BR-01", type="RETAIL")
+        self.item = Item.objects.create(
+            category=self.cat, name="Coke", sku="DRK-001",
+            cost_price="10", selling_price="25", stock_qty=100,
+            branch=self.branch
+        )
+        session = self.client.session
+        session["current_branch_id"] = self.branch.id
+        session.save()
+
+    def test_borrower_list_url_exists(self):
+        """Borrower list URL should resolve."""
+        from pos.urls import urlpatterns
+        urls = [p.pattern.name for p in urlpatterns if hasattr(p.pattern, 'name')]
+        self.assertIn('borrower_list', urls)
+
+    def test_borrower_list_page_accessible(self):
+        """Borrower list page should return 200."""
+        response = self.client.get(reverse('borrower_list'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_borrower_list_shows_borrowers(self):
+        """Borrower list page should show existing borrower records."""
+        from pos.models import Borrower
+        from django.utils import timezone
+        Borrower.objects.create(
+            name="Juan Dela Cruz",
+            product=self.item,
+            price="25.00",
+            qty=2,
+            date_borrowed=timezone.now().date(),
+            contact="09171234567",
+            address="123 Rizal St",
+            branch=self.branch
+        )
+        response = self.client.get(reverse('borrower_list'))
+        self.assertContains(response, "Juan Dela Cruz")
+
+    def test_borrower_add_url_exists(self):
+        """Borrower add URL should resolve."""
+        from pos.urls import urlpatterns
+        urls = [p.pattern.name for p in urlpatterns if hasattr(p.pattern, 'name')]
+        self.assertIn('borrower_add', urls)
+
+    def test_borrower_add_page_accessible(self):
+        """Borrower add page should return 200."""
+        response = self.client.get(reverse('borrower_add'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_borrower_add_page_has_form(self):
+        """Borrower add page should have a form with expected fields."""
+        response = self.client.get(reverse('borrower_add'))
+        self.assertContains(response, "Name")
+        self.assertContains(response, "Product")
+        self.assertContains(response, "Price")
+        self.assertContains(response, "Size")
+        self.assertContains(response, "Quantity")
+        self.assertContains(response, "Date Borrowed")
+        self.assertContains(response, "Return Date")
+        self.assertContains(response, "Contact")
+        self.assertContains(response, "Address")
+
+    def test_borrower_add_page_has_receipt_upload(self):
+        """Borrower add page should have a file upload for receipt."""
+        response = self.client.get(reverse('borrower_add'))
+        self.assertContains(response, "Receipt")
+        self.assertContains(response, "file")
+
+    def test_borrower_can_be_created_via_form(self):
+        """Creating a borrower via POST should redirect and persist."""
+        from pos.models import Borrower
+        from django.utils import timezone
+        response = self.client.post(reverse('borrower_add'), {
+            'name': 'Pedro Santos',
+            'product': self.item.id,
+            'price': '30.00',
+            'size': '2L',
+            'qty': 1,
+            'date_borrowed': timezone.now().date().isoformat(),
+            'contact': '09180000000',
+            'address': '456 Mabini St',
+        })
+        self.assertEqual(Borrower.objects.count(), 1)
+        self.assertEqual(Borrower.objects.first().name, 'Pedro Santos')
+
+    def test_sidebar_has_borrower_link(self):
+        """Sidebar should have a Product Lend link."""
+        response = self.client.get(reverse('borrower_list'))
+        self.assertContains(response, "Product Lend")
+
+    def test_borrower_list_in_sidebar(self):
+        """The sidebar should contain a nav item for Product Lend."""
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, "Product Lend")

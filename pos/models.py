@@ -418,3 +418,31 @@ class Queue(models.Model):
     def __str__(self):
         return f"{self.patient.name} — {self.status} ({self.service or 'No service'})"
 
+
+class Borrower(models.Model):
+    """Record of lent product to a borrower (Phase 5: Product Lend)."""
+
+    name = models.CharField(max_length=255)
+    product = models.ForeignKey(
+        Item, on_delete=models.SET_NULL, null=True, related_name="borrowers"
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    size = models.CharField(max_length=100, blank=True, default="")
+    qty = models.PositiveIntegerField(default=1)
+    date_borrowed = models.DateField()
+    return_date = models.DateField(null=True, blank=True)
+    contact = models.CharField(max_length=50)
+    address = models.TextField()
+    receipt = models.ImageField(upload_to="borrower_receipts/", blank=True, null=True)
+    branch = models.ForeignKey(
+        Branch, on_delete=models.CASCADE, null=True, related_name="borrowers"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.name
+

@@ -1,0 +1,143 @@
+{% extends "pos/base.html" %}
+{% load static %}
+
+{% block title %}CASSEY — New Borrower{% endblock %}
+
+{% block breadcrumb %}
+<h2>➕ New Borrower</h2>
+{% url 'home' as crumb_home_url %}<div class="breadcrumb"><a href="{{ crumb_home_url }}">Dashboard</a><span class="sep">/</span><a href="{% url 'borrower_list' %}">Borrowers</a><span class="sep">/</span><span>New</span></div>
+{% endblock %}
+
+{% block topbar_right %}
+<div class="topbar-right">
+    {% if branch %}
+    <span style="font-size:0.75rem;color:var(--text-muted-content);margin-right:0.5rem;display:inline-flex;align-items:center;gap:0.3rem;">
+        <span>🏪</span>
+        {{ branch.name }}
+    </span>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:640px;">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Borrower Name *</label>
+                <input type="text" name="name" required placeholder="e.g. Juan Dela Cruz" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            </div>
+            <div class="form-group">
+                <label>Contact # *</label>
+                <input type="text" name="contact" required placeholder="e.g. 09171234567" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Product *</label>
+                <select name="product" id="productSelect" onchange="updateProductPrice()" required style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+                    <option value="">Select product...</option>
+                    {% for item in items %}
+                    <option value="{{ item.id }}" data-price="{{ item.selling_price }}">{{ item.emoji|default:"📦" }} {{ item.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Price (₱) *</label>
+                <input type="number" name="price" id="priceField" step="0.01" required style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Size</label>
+                <select name="size" id="sizeSelect" onchange="updatePriceFromSize()" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+                    <option value="">No size</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity *</label>
+                <input type="number" name="qty" value="1" min="1" required style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Date Borrowed *</label>
+                <input type="date" name="date_borrowed" value="{{ today }}" required style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            </div>
+            <div class="form-group">
+                <label>Return Date</label>
+                <input type="date" name="return_date" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+                <div class="help" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.2rem;">Leave blank if not yet returned</div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Address *</label>
+            <textarea name="address" required rows="2" placeholder="e.g. 123 Rizal St, Brgy. San Isidro, Manila" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Receipt Image</label>
+            <input type="file" name="receipt" accept="image/*" style="width:100%;padding:0.55rem 0.75rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;outline:none;font-family:inherit;">
+            <div class="help" style="font-size:0.75rem;color:var(--text-muted-content);margin-top:0.2rem;">Upload a photo of the receipt (optional)</div>
+        </div>
+
+        <div class="actions" style="display:flex;gap:0.75rem;margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--border);">
+            <button type="submit" class="btn btn-primary">💾 Save Borrower</button>
+            <a href="{% url 'borrower_list' %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+const itemsData = {{ items_json|safe }};
+
+function updateProductPrice() {
+    const sel = document.getElementById('productSelect');
+    const priceField = document.getElementById('priceField');
+    const sizeSel = document.getElementById('sizeSelect');
+    sizeSel.innerHTML = '<option value="">No size</option>';
+    const selected = sel.selectedOptions[0];
+    if (selected && selected.value) {
+        const itemId = parseInt(selected.value);
+        const item = itemsData.find(i => i.id === itemId);
+        if (item) {
+            priceField.value = item.selling_price;
+            if (item.sizes && item.sizes.length > 0) {
+                sizeSel.innerHTML = '<option value="">No size</option>';
+                item.sizes.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s.name;
+                    opt.dataset.price = s.price;
+                    opt.textContent = s.name + ' (₱' + parseFloat(s.price).toFixed(2) + ')';
+                    sizeSel.appendChild(opt);
+                });
+            }
+        }
+    } else {
+        priceField.value = '';
+    }
+}
+
+function updatePriceFromSize() {
+    const sizeSel = document.getElementById('sizeSelect');
+    const priceField = document.getElementById('priceField');
+    const selected = sizeSel.selectedOptions[0];
+    if (selected && selected.value && selected.dataset.price) {
+        priceField.value = selected.dataset.price;
+    }
+}
+</script>
+
+<style>
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}

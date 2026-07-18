@@ -11,8 +11,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy
-from .models import Item, ItemSize, Category, Transaction, TransactionItem, DiscountType, MealSubcategory, Shift, CashCount, Expense, Staff, Branch
+from .models import Item, ItemSize, Category, Transaction, TransactionItem, DiscountType, MealSubcategory, Shift, CashCount, Expense, Staff, Branch, Borrower
 from .services import CheckoutEngine
+from django.contrib.auth.decorators import login_required
+from datetime import date
 
 
 
@@ -1187,4 +1189,74 @@ def shift_report_print(request, shift_id):
         "report": report,
         "report_type": report_type,
         "generated_at": tz_util.now().strftime("%Y-%m-%d %H:%M"),
+    })
+
+
+# ---- Borrower (Phase 5: Product Lend) ----
+
+@login_required
+def borrower_list(request):
+    """List all borrower records for the current branch."""
+    branch_id = request.session.get("current_branch_id")
+    borrowers = Borrower.objects.filter(branch_id=branch_id).select_related("product")
+    return render(request, "pos/borrower_list.html", {
+        "borrowers": borrowers,
+        "nav_active": "borrower",
+    })
+
+
+@login_required
+def borrower_add(request):
+    """Add a new borrower record."""
+    branch_id = request.session.get("current_branch_id")
+    branch = Branch.objects.filter(id=branch_id).first()
+    items = Item.objects.filter(branch_id=branch_id).order_by("name")
+
+    if request.method == "POST":
+        name = request.POST.get("name", "")
+        product_id = request.POST.get("product")
+        price = request.POST.get("price", "0")
+        size = request.POST.get("size", "")
+        qty = request.POST.get("qty", 1)
+        date_borrowed = request.POST.get("date_borrowed")
+        return_date = request.POST.get("return_date") or None
+        contact = request.POST.get("contact", "")
+        address = request.POST.get("address", "")
+        receipt = request.FILES.get("receipt")
+
+        product = Item.objects.filter(id=product_id).first() if product_id else None
+
+        Borrower.objects.create(
+            name=name,
+            product=product,
+            price=price,
+            size=size,
+            qty=qty,
+            date_borrowed=date_borrowed,
+            return_date=return_date,
+            contact=contact,
+            address=address,
+            receipt=receipt,
+            branch=branch,
+        )
+        return redirect("borrower_list")
+
+    # GET: fetch items for the product dropdown, with their sizes
+    items_with_sizes = []
+    for item in items:
+        item_size_list = list(item.sizes.all().values("name", "price"))
+        items_with_sizes.append({
+            "id": item.id,
+            "name": item.name,
+            "emoji": item.emoji or "📦",
+            "selling_price": float(item.selling_price),
+            "sizes": [{"name": s.name, "price": float(s.price)} for s in item_size_list],
+        })
+
+    return render(request, "pos/borrower_add.html", {
+        "items": items,
+        "items_json": json.dumps(items_with_sizes),
+        "branch": branch,
+        "today": date.today().isoformat(),
+        "nav_active": "borrower",
     })
