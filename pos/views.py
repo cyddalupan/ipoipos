@@ -96,6 +96,34 @@ def home(request):
     return render(request, "pos/home.html", context)
 
 
+def pos_order(request):
+    """Dedicated POS order page — product grid, category filter, cart, and checkout."""
+    branch = _get_branch(request)
+    if not branch:
+        return redirect("branch_select")
+
+    search_q = request.GET.get("q", "")
+    items_qs = Item.objects.filter(is_active=True, branch=branch).select_related("category").prefetch_related("sizes").order_by("category__name", "name")
+    if search_q:
+        from django.db.models import Q
+        items_qs = items_qs.filter(
+            Q(name__icontains=search_q) | Q(sku__icontains=search_q)
+        )
+    items = items_qs
+    discounts = DiscountType.objects.filter(is_active=True)
+    categories = Category.objects.all().order_by("name")
+
+    context = {
+        "nav_active": "pos_order",
+        "items": items,
+        "discounts": discounts,
+        "categories": categories,
+        "show_branch_switcher": True,
+        "search_q": search_q,
+    }
+    return render(request, "pos/pos_order.html", context)
+
+
 class InventoryDashboardView(ListView):
     model = Item
     template_name = "inventory/dashboard.html"

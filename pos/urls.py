@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path("", views.branch_select, name="branch_select"),
     path("pos/", views.home, name="home"),
+    path("pos/order/", views.pos_order, name="pos_page"),
     path("switch-branch/", views.branch_switch, name="branch_switch"),
     path("inventory/", views.InventoryDashboardView.as_view(), name="inventory_dashboard"),
     path("inventory/add/", views.ItemCreateView.as_view(), name="item_add"),

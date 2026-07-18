@@ -3615,22 +3615,22 @@ class POSCategoryFilterTest(TestCase):
         session.save()
 
     def test_home_page_lists_categories(self):
-        """Home POS page should include category names for filter."""
-        response = self.client.get(reverse("home"))
+        """POS order page should include category names for filter."""
+        response = self.client.get(reverse("pos_page"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Beverages")
         self.assertContains(response, "Food")
 
     def test_home_page_has_category_filter_buttons(self):
-        """POS home page should have category filter buttons/tabs."""
-        response = self.client.get(reverse("home"))
+        """POS order page should have category filter buttons/tabs."""
+        response = self.client.get(reverse("pos_page"))
         self.assertEqual(response.status_code, 200)
         content = response.content.decode()
         self.assertIn("All", content)
 
     def test_home_page_shows_all_products_by_default(self):
-        """All products should display on POS home by default."""
-        response = self.client.get(reverse("home"))
+        """All products should display on POS order page by default."""
+        response = self.client.get(reverse("pos_page"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Coke")
         self.assertContains(response, "Burger")
@@ -3665,28 +3665,28 @@ class POSSearchTest(TestCase):
 
     def test_search_by_name(self):
         """Searching by name should filter products."""
-        response = self.client.get(reverse("home") + "?q=Coca")
+        response = self.client.get(reverse("pos_page") + "?q=Coca")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Coca Cola")
         self.assertNotContains(response, "Pepsi")
 
     def test_search_by_sku(self):
         """Searching by SKU should find the product."""
-        response = self.client.get(reverse("home") + "?q=DRK-002")
+        response = self.client.get(reverse("pos_page") + "?q=DRK-002")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pepsi")
         self.assertNotContains(response, "Coca Cola")
 
     def test_search_empty_results(self):
         """Search with no matches should show empty state."""
-        response = self.client.get(reverse("home") + "?q=ZZZZZ")
+        response = self.client.get(reverse("pos_page") + "?q=ZZZZZ")
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Coca Cola")
         self.assertNotContains(response, "Pepsi")
 
     def test_search_case_insensitive(self):
         """Search should be case-insensitive."""
-        response = self.client.get(reverse("home") + "?q=pepsi")
+        response = self.client.get(reverse("pos_page") + "?q=pepsi")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Pepsi")
 
@@ -3758,3 +3758,60 @@ class POSReceiptViewTest(TestCase):
         )
         response = self.client.get(reverse("receipt", kwargs={"pk": self.txn.pk}))
         self.assertContains(response, "Coke")
+
+
+class POSPageTest(TestCase):
+    """Tests for the dedicated POS order page."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="user", password="***")
+        self.client.force_login(self.user)
+        self.cat = Category.objects.create(name="Beverages")
+        self.branch = Branch.objects.create(name="Branch", type="RETAIL", code="BR-01")
+        self.item = Item.objects.create(
+            category=self.cat, name="Coke", sku="DRK-001",
+            cost_price="10", selling_price="25", stock_qty=100,
+            branch=self.branch
+        )
+        session = self.client.session
+        session["current_branch_id"] = self.branch.id
+        session.save()
+
+    def test_pos_page_exists(self):
+        """Dedicated POS page should be accessible."""
+        response = self.client.get(reverse("pos_page"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_pos_page_shows_products(self):
+        """POS page should show products."""
+        response = self.client.get(reverse("pos_page"))
+        self.assertContains(response, "Coke")
+
+    def test_pos_page_shows_search(self):
+        """POS page should have search."""
+        response = self.client.get(reverse("pos_page"))
+        self.assertContains(response, "Search")
+
+    def test_pos_page_shows_cart(self):
+        """POS page should have the cart section."""
+        response = self.client.get(reverse("pos_page"))
+        self.assertContains(response, "Cart")
+
+    def test_pos_page_has_submit_button(self):
+        """POS page submit button should contain the word 'submit'."""
+        response = self.client.get(reverse("pos_page"))
+        content = response.content.decode().lower()
+        self.assertIn("submit", content)
+
+    def test_pos_page_shows_category_filter(self):
+        """POS page should have category filter buttons."""
+        response = self.client.get(reverse("pos_page"))
+        self.assertContains(response, "Beverages")
+
+    def test_pos_page_no_dashboard_stats(self):
+        """POS page should NOT contain dashboard stats."""
+        response = self.client.get(reverse("pos_page"))
+        content = response.content.decode()
+        self.assertNotIn("Today's Sales", content)
+        self.assertNotIn("Low Stock", content)
+        self.assertNotIn("chart-sales-trend", content)
