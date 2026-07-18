@@ -13,7 +13,6 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, V
 from django.urls import reverse_lazy
 from .models import Item, ItemSize, Category, Transaction, TransactionItem, DiscountType, MealSubcategory, Shift, CashCount, Expense, Staff, Branch, Borrower
 from .services import CheckoutEngine
-from django.contrib.auth.decorators import login_required
 from datetime import date
 
 
@@ -1194,7 +1193,6 @@ def shift_report_print(request, shift_id):
 
 # ---- Borrower (Phase 5: Product Lend) ----
 
-@login_required
 def borrower_list(request):
     """List all borrower records for the current branch."""
     branch_id = request.session.get("current_branch_id")
@@ -1205,7 +1203,6 @@ def borrower_list(request):
     })
 
 
-@login_required
 def borrower_add(request):
     """Add a new borrower record."""
     branch_id = request.session.get("current_branch_id")
@@ -1250,7 +1247,7 @@ def borrower_add(request):
             "name": item.name,
             "emoji": item.emoji or "📦",
             "selling_price": float(item.selling_price),
-            "sizes": [{"name": s.name, "price": float(s.price)} for s in item_size_list],
+            "sizes": [{"name": s["name"], "price": float(s["price"])} for s in item_size_list],
         })
 
     return render(request, "pos/borrower_add.html", {
